@@ -3,6 +3,7 @@
  * GLAIMAGAIN - Luxury Product Details Page
  */
 require_once __DIR__ . '/config/config.php';
+require_once __DIR__ . '/includes/auth.php';
 
 $pdo = getDb();
 $slug = trim($_GET['slug'] ?? '');
@@ -75,57 +76,73 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         exit;
     }
 
-    if (!isUserLoggedIn()) {
-        if ($isAjax) {
-            http_response_code(401);
-            header('Content-Type: application/json');
-            echo json_encode(['success' => false, 'message' => 'Please sign in to your GLAIMAGAIN account to submit a review.']);
-            exit;
-        }
-        setFlashMessage('warning', 'Please sign in to your GLAIMAGAIN account to submit a review.');
-        header('Location: ' . BASE_URL . 'login.php');
-        exit;
-    }
-
+    $currentUser = getCurrentUser();
     $rating = max(1, min(5, (int)($_POST['rating'] ?? 5)));
     $reviewTitle = trim($_POST['title'] ?? '');
     $reviewComment = trim($_POST['comment'] ?? '');
-    $currentUser = getCurrentUser();
+
+    // Author Details: Logged in or Guest
+    if ($currentUser) {
+        $userId = (int)$currentUser['id'];
+        $guestName = null;
+        $guestEmail = null;
+        $authorName = trim($currentUser['first_name'] . ' ' . $currentUser['last_name']);
+        $isVerified = true;
+    } else {
+        $userId = null;
+        $guestName = trim($_POST['guest_name'] ?? '');
+        $guestEmail = trim($_POST['guest_email'] ?? '');
+        $authorName = $guestName ?: 'Patron';
+        $isVerified = false;
+
+        if (empty($guestName)) {
+            if ($isAjax) {
+                http_response_code(400);
+                header('Content-Type: application/json');
+                echo json_encode(['success' => false, 'message' => 'Please provide your name with the review.']);
+                exit;
+            }
+            setFlashMessage('danger', 'Please provide your name with the review.');
+            header('Location: ' . BASE_URL . 'product/' . urlencode($slug) . '#reviews');
+            exit;
+        }
+    }
 
     if (!empty($reviewTitle) && !empty($reviewComment)) {
         $insReview = $pdo->prepare("
-            INSERT INTO reviews (product_id, user_id, rating, title, comment, status)
-            VALUES (?, ?, ?, ?, ?, 'approved')
+            INSERT INTO reviews (product_id, user_id, guest_name, guest_email, rating, title, comment, status)
+            VALUES (?, ?, ?, ?, ?, ?, ?, 'approved')
         ");
-        $insReview->execute([$product['id'], $currentUser['id'], $rating, $reviewTitle, $reviewComment]);
+        $insReview->execute([$product['id'], $userId, $guestName, $guestEmail, $rating, $reviewTitle, $reviewComment]);
 
         if ($isAjax) {
             header('Content-Type: application/json');
             echo json_encode([
                 'success' => true,
-                'message' => 'Thank you for your review. It has been published.',
+                'message' => 'Thank you! Your review has been published successfully.',
                 'review' => [
                     'rating' => $rating,
                     'title' => htmlspecialchars($reviewTitle, ENT_QUOTES, 'UTF-8'),
                     'comment' => htmlspecialchars($reviewComment, ENT_QUOTES, 'UTF-8'),
-                    'author' => htmlspecialchars($currentUser['first_name'] . ' ' . $currentUser['last_name'], ENT_QUOTES, 'UTF-8'),
+                    'author' => htmlspecialchars($authorName, ENT_QUOTES, 'UTF-8'),
+                    'is_verified' => $isVerified,
                     'date' => date('M d, Y')
                 ]
             ]);
             exit;
         }
 
-        setFlashMessage('success', 'Thank you for your review. It has been published.');
+        setFlashMessage('success', 'Thank you! Your review has been published.');
         header('Location: ' . BASE_URL . 'product/' . urlencode($slug) . '#reviews');
         exit;
     } else {
         if ($isAjax) {
             http_response_code(400);
             header('Content-Type: application/json');
-            echo json_encode(['success' => false, 'message' => 'Please provide both a title and comments for your review.']);
+            echo json_encode(['success' => false, 'message' => 'Please provide both a headline and comments for your review.']);
             exit;
         }
-        setFlashMessage('danger', 'Please provide both a title and comments for your review.');
+        setFlashMessage('danger', 'Please provide both a headline and comments for your review.');
         header('Location: ' . BASE_URL . 'product/' . urlencode($slug) . '#reviews');
         exit;
     }
@@ -133,9 +150,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 
 // Fetch Approved Reviews
 $revStmt = $pdo->prepare("
-    SELECT r.*, u.first_name, u.last_name
+    SELECT r.*, 
+           COALESCE(NULLIF(TRIM(CONCAT(COALESCE(u.first_name, ''), ' ', COALESCE(u.last_name, ''))), ''), r.guest_name, 'Patron') AS author_name,
+           u.username,
+           CASE WHEN r.user_id IS NOT NULL THEN 1 ELSE 0 END AS is_verified_patron
     FROM reviews r
-    JOIN users u ON r.user_id = u.id
+    LEFT JOIN users u ON r.user_id = u.id
     WHERE r.product_id = ? AND r.status = 'approved'
     ORDER BY r.id DESC
 ");
@@ -351,13 +371,14 @@ require_once __DIR__ . '/includes/header.php';
             <div class="col-lg-7">
                 <h3 class="fw-bold text-emerald mb-4">CLIENT REVIEWS (<?= count($reviews) ?>)</h3>
                 <?php if (empty($reviews)): ?>
-                    <div class="p-4 bg-offwhite rounded border text-muted small">
-                        No reviews yet for this garment. Be the first to share your experience with fellow patrons.
+                    <div class="p-4 bg-offwhite rounded border text-muted small" id="noReviewsNotice">
+                        <i class="fas fa-comment-alt text-gold me-2"></i> No reviews yet for this garment. Be the first to share your experience with fellow patrons!
                     </div>
+                    <div class="d-flex flex-column gap-3 mt-3" id="reviewsContainer"></div>
                 <?php else: ?>
-                    <div class="d-flex flex-column gap-3">
+                    <div class="d-flex flex-column gap-3" id="reviewsContainer">
                         <?php foreach ($reviews as $r): ?>
-                            <div class="p-4 bg-white border border-gold-subtle rounded shadow-sm">
+                            <div class="p-4 bg-white border border-gold-subtle rounded shadow-sm review-card-item">
                                 <div class="d-flex justify-content-between align-items-center mb-2">
                                     <div class="text-gold">
                                         <?php for ($i = 1; $i <= 5; $i++): ?>
@@ -368,8 +389,12 @@ require_once __DIR__ . '/includes/header.php';
                                 </div>
                                 <h6 class="fw-bold text-emerald mb-1"><?= e($r['title']) ?></h6>
                                 <p class="text-muted small mb-2"><?= e($r['comment']) ?></p>
-                                <div class="small text-muted">
-                                    <i class="fas fa-user-check text-gold me-1"></i><?= e($r['first_name'] . ' ' . $r['last_name']) ?> <span class="badge bg-emerald text-gold ms-1">Verified Patron</span>
+                                <div class="small text-muted d-flex align-items-center gap-1">
+                                    <i class="fas fa-user-check text-gold me-1"></i>
+                                    <strong><?= e($r['author_name']) ?></strong>
+                                    <?php if ($r['is_verified_patron']): ?>
+                                        <span class="badge bg-emerald text-gold ms-1" style="font-size: 10px;">Verified Patron</span>
+                                    <?php endif; ?>
                                 </div>
                             </div>
                         <?php endforeach; ?>
@@ -377,46 +402,59 @@ require_once __DIR__ . '/includes/header.php';
                 <?php endif; ?>
             </div>
 
+            <!-- Leave a Review Box -->
             <div class="col-lg-5">
                 <div class="p-4 bg-offwhite border border-gold-subtle rounded shadow-sm">
                     <h5 class="fw-bold text-emerald mb-3">LEAVE A REVIEW</h5>
-                    <?php if (isUserLoggedIn()): ?>
-                        <form method="POST" action="<?= BASE_URL ?>product/<?= urlencode($slug) ?>#reviews" id="reviewForm">
-                            <?= csrfField() ?>
-                            <input type="hidden" name="action" value="submit_review">
+                    <form method="POST" action="<?= BASE_URL ?>product/<?= urlencode($slug) ?>#reviews" id="reviewForm">
+                        <?= csrfField() ?>
+                        <input type="hidden" name="action" value="submit_review">
 
-                            <div class="mb-3">
-                                <label class="form-label small fw-bold text-emerald">Rating</label>
-                                <select name="rating" class="form-select form-select-sm" required>
-                                    <option value="5">★★★★★ (5 Stars - Bespoke Excellence)</option>
-                                    <option value="4">★★★★☆ (4 Stars - High Quality)</option>
-                                    <option value="3">★★★☆☆ (3 Stars - Average)</option>
-                                    <option value="2">★★☆☆☆ (2 Stars - Below Expectation)</option>
-                                    <option value="1">★☆☆☆☆ (1 Star - Poor)</option>
-                                </select>
+                        <?php if ($currentUser): ?>
+                            <div class="p-2 px-3 bg-white rounded border mb-3 d-flex align-items-center justify-content-between">
+                                <div class="small text-emerald fw-bold">
+                                    <i class="fas fa-user-circle text-gold me-1"></i> <?= e($currentUser['first_name'] . ' ' . $currentUser['last_name']) ?>
+                                </div>
+                                <span class="badge bg-emerald text-gold" style="font-size: 10px;">Verified</span>
                             </div>
-
-                            <div class="mb-3">
-                                <label class="form-label small fw-bold text-emerald">Review Headline</label>
-                                <input type="text" name="title" class="form-control form-control-sm" placeholder="e.g. Impeccable drape & fabric" required>
+                        <?php else: ?>
+                            <div class="row g-2 mb-3">
+                                <div class="col-sm-6">
+                                    <label class="form-label small fw-bold text-emerald">Your Name <span class="text-gold">*</span></label>
+                                    <input type="text" name="guest_name" class="form-control form-control-sm" placeholder="e.g. Aarav Mehta" required>
+                                </div>
+                                <div class="col-sm-6">
+                                    <label class="form-label small fw-bold text-emerald">Email Address</label>
+                                    <input type="email" name="guest_email" class="form-control form-control-sm" placeholder="aarav@example.com">
+                                </div>
                             </div>
+                        <?php endif; ?>
 
-                            <div class="mb-3">
-                                <label class="form-label small fw-bold text-emerald">Comments</label>
-                                <textarea name="comment" rows="3" class="form-control form-control-sm" placeholder="Describe the fit, tactile feel, and finishing..." required></textarea>
-                            </div>
-
-                            <button type="submit" class="btn btn-luxury-primary w-100 py-2">
-                                SUBMIT VERIFIED REVIEW
-                            </button>
-                        </form>
-                    <?php else: ?>
-                        <div class="text-center py-4">
-                            <i class="fas fa-lock text-gold fs-3 mb-2"></i>
-                            <p class="text-muted small mb-3">Please sign in to your GLAIMAGAIN account to submit a client review.</p>
-                            <a href="<?= BASE_URL ?>login.php" class="btn btn-luxury-primary btn-sm">SIGN IN</a>
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold text-emerald">Rating</label>
+                            <select name="rating" class="form-select form-select-sm" required>
+                                <option value="5">★★★★★ (5 Stars - Bespoke Excellence)</option>
+                                <option value="4">★★★★☆ (4 Stars - High Quality)</option>
+                                <option value="3">★★★☆☆ (3 Stars - Average)</option>
+                                <option value="2">★★☆☆☆ (2 Stars - Below Expectation)</option>
+                                <option value="1">★☆☆☆☆ (1 Star - Poor)</option>
+                            </select>
                         </div>
-                    <?php endif; ?>
+
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold text-emerald">Review Headline</label>
+                            <input type="text" name="title" class="form-control form-control-sm" placeholder="e.g. Impeccable drape & fabric" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold text-emerald">Comments</label>
+                            <textarea name="comment" rows="3" class="form-control form-control-sm" placeholder="Describe the fit, tactile feel, and finishing..." required></textarea>
+                        </div>
+
+                        <button type="submit" class="btn btn-luxury-primary w-100 py-2">
+                            SUBMIT VERIFIED REVIEW
+                        </button>
+                    </form>
                 </div>
             </div>
         </div>

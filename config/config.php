@@ -70,3 +70,4 @@ require_once CONFIG_PATH . 'database.php';
 require_once CONFIG_PATH . 'razorpay.php';
 require_once INCLUDES_PATH . 'csrf.php';
 require_once INCLUDES_PATH . 'functions.php';
+require_once INCLUDES_PATH . 'auth.php';
