@@ -32,10 +32,19 @@ if (!$product) {
 // Increment View Count
 $pdo->prepare("UPDATE products SET views_count = views_count + 1 WHERE id = ?")->execute([$product['id']]);
 
-// Fetch Product Images
-$imgStmt = $pdo->prepare("SELECT * FROM product_images WHERE product_id = ? ORDER BY is_primary DESC, sort_order ASC");
+// Fetch Product Images (with color tagging)
+$imgStmt = $pdo->prepare("SELECT * FROM product_images WHERE product_id = ? ORDER BY is_primary DESC, sort_order ASC, id ASC");
 $imgStmt->execute([$product['id']]);
 $productImages = $imgStmt->fetchAll();
+
+// Build map of Color -> Image URL
+$colorImageMap = [];
+foreach ($productImages as $img) {
+    if (!empty($img['color']) && !isset($colorImageMap[trim($img['color'])])) {
+        $colorImageMap[trim($img['color'])] = getProductImageUrl($img['image_path']);
+    }
+}
+
 
 if (empty($productImages)) {
     $productImages = [['image_path' => 'assets/images/placeholder-product.svg', 'is_primary' => 1]];
@@ -247,14 +256,21 @@ require_once __DIR__ . '/includes/header.php';
 
                     <!-- Color Picker -->
                     <div class="variant-selector-group">
-                        <div class="variant-label">
-                            <span>Select Color</span>
+                        <div class="variant-label d-flex justify-content-between align-items-center">
+                            <span>Select Color: <strong id="selectedColorDisplay" class="text-emerald"><?= e($availableColors[0] ?? '') ?></strong></span>
+                            <span class="small text-muted" style="font-size: 11px;">Click color to preview garment</span>
                         </div>
                         <div class="variant-options">
-                            <?php foreach ($availableColors as $idx => $color): ?>
-                                <label class="variant-btn <?= $idx === 0 ? 'active' : '' ?>">
-                                    <input type="radio" name="color" value="<?= e($color) ?>" <?= $idx === 0 ? 'checked' : '' ?> class="d-none">
-                                    <?= e($color) ?>
+                            <?php foreach ($availableColors as $idx => $color): 
+                                $cName = trim($color);
+                                $cImg = $colorImageMap[$cName] ?? ($productImages[$idx]['image_path'] ?? null ? getProductImageUrl($productImages[$idx]['image_path']) : '');
+                            ?>
+                                <label class="variant-btn <?= $idx === 0 ? 'active' : '' ?>" 
+                                       data-color="<?= e($cName) ?>" 
+                                       data-image="<?= e($cImg) ?>" 
+                                       onclick="selectProductColor(this, '<?= e($cName) ?>', '<?= e($cImg) ?>')">
+                                    <input type="radio" name="color" value="<?= e($cName) ?>" <?= $idx === 0 ? 'checked' : '' ?> class="d-none">
+                                    <?= e($cName) ?>
                                 </label>
                             <?php endforeach; ?>
                         </div>
@@ -327,11 +343,11 @@ require_once __DIR__ . '/includes/header.php';
                 </div>
             </div>
         </div>
-    </div>
+    </div> <!-- Ends Product Main Row -->
 
-    <!-- Client Reviews Section -->
+    <!-- Client Reviews Section (Inside Central Luxury Container for Desktop & Mobile) -->
     <div class="mt-5 pt-5 border-top" id="reviews">
-        <div class="row g-5">
+        <div class="row g-4 g-lg-5">
             <div class="col-lg-7">
                 <h3 class="fw-bold text-emerald mb-4">CLIENT REVIEWS (<?= count($reviews) ?>)</h3>
                 <?php if (empty($reviews)): ?>
@@ -404,7 +420,7 @@ require_once __DIR__ . '/includes/header.php';
                 </div>
             </div>
         </div>
-    </div>
+    </div> <!-- Ends #reviews -->
 
     <!-- Related Products -->
     <?php if (!empty($relatedProducts)): ?>
@@ -484,6 +500,40 @@ require_once __DIR__ . '/includes/header.php';
 </div>
 
 <script>
+
+// Dynamic Color Switcher: updates selection and swaps main image with smooth fade
+function selectProductColor(labelEl, colorName, imageUrl) {
+    document.querySelectorAll('.variant-selector-group .variant-btn input[name="color"]').forEach(input => {
+        input.closest('.variant-btn').classList.remove('active');
+    });
+    labelEl.classList.add('active');
+    const radio = labelEl.querySelector('input');
+    if (radio) radio.checked = true;
+
+    const displayEl = document.getElementById('selectedColorDisplay');
+    if (displayEl) displayEl.textContent = colorName;
+
+    if (imageUrl) {
+        const mainImg = document.getElementById('mainProductImage');
+        if (mainImg) {
+            mainImg.style.transition = 'opacity 0.2s ease';
+            mainImg.style.opacity = '0.3';
+            setTimeout(() => {
+                mainImg.src = imageUrl;
+                mainImg.style.opacity = '1';
+            }, 180);
+        }
+
+        // Also highlight matching thumbnail if exists
+        document.querySelectorAll('.product-thumb-item img').forEach(tImg => {
+            if (tImg.src === imageUrl) {
+                document.querySelectorAll('.product-thumb-item').forEach(el => el.classList.remove('active'));
+                tImg.closest('.product-thumb-item').classList.add('active');
+            }
+        });
+    }
+}
+
 function switchProductImage(src, thumbElement) {
     document.getElementById('mainProductImage').src = src;
     document.querySelectorAll('.product-thumb-item').forEach(el => el.classList.remove('active'));

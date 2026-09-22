@@ -24,6 +24,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $stock = max(0, (int)($_POST['stock'] ?? 0));
     $sizes = trim($_POST['sizes'] ?? 'S,M,L,XL');
     $colors = trim($_POST['colors'] ?? 'Emerald Green,Midnight Black');
+    if (!empty($_POST['color_names'])) {
+        $parsedColors = array_filter(array_map('trim', $_POST['color_names']));
+        if (!empty($parsedColors)) {
+            $colors = implode(',', $parsedColors);
+        }
+    }
     $isFeatured = !empty($_POST['is_featured']) ? 1 : 0;
     $isNewArrival = !empty($_POST['is_new_arrival']) ? 1 : 0;
     $isBestSeller = !empty($_POST['is_best_seller']) ? 1 : 0;
@@ -74,8 +80,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ]);
             $productId = (int)$pdo->lastInsertId();
 
-            // Handle Multiple Image Uploads
+                        // 1. Handle Color-Specific Photo Uploads
             $hasPrimary = false;
+            if (!empty($_POST['color_names'])) {
+                foreach ($_POST['color_names'] as $idx => $cName) {
+                    $cName = trim($cName);
+                    if (empty($cName)) continue;
+
+                    if (isset($_FILES['color_images']['name'][$idx]) && $_FILES['color_images']['error'][$idx] === UPLOAD_ERR_OK) {
+                        $singleFile = [
+                            'name'     => $_FILES['color_images']['name'][$idx],
+                            'type'     => $_FILES['color_images']['type'][$idx],
+                            'tmp_name' => $_FILES['color_images']['tmp_name'][$idx],
+                            'error'    => $_FILES['color_images']['error'][$idx],
+                            'size'     => $_FILES['color_images']['size'][$idx],
+                        ];
+                        $upload = handleImageUpload($singleFile, 'products');
+                        if ($upload['success']) {
+                            $isPrimary = (!$hasPrimary) ? 1 : 0;
+                            $pdo->prepare("INSERT INTO product_images (product_id, image_path, is_primary, color, sort_order) VALUES (?, ?, ?, ?, ?)")
+                                ->execute([$productId, $upload['path'], $isPrimary, $cName, $idx]);
+                            $hasPrimary = true;
+                        }
+                    }
+                }
+            }
+
+            // 2. Handle Additional General Gallery Images
             if (!empty($_FILES['product_images']['name'][0])) {
                 $fileCount = count($_FILES['product_images']['name']);
                 for ($i = 0; $i < $fileCount; $i++) {
@@ -90,8 +121,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $upload = handleImageUpload($singleFile, 'products');
                         if ($upload['success']) {
                             $isPrimary = (!$hasPrimary) ? 1 : 0;
-                            $pdo->prepare("INSERT INTO product_images (product_id, image_path, is_primary, sort_order) VALUES (?, ?, ?, ?)")
-                                ->execute([$productId, $upload['path'], $isPrimary, $i]);
+                            $pdo->prepare("INSERT INTO product_images (product_id, image_path, is_primary, color, sort_order) VALUES (?, ?, ?, NULL, ?)")
+                                ->execute([$productId, $upload['path'], $isPrimary, 10 + $i]);
                             $hasPrimary = true;
                         }
                     }
@@ -225,10 +256,60 @@ require_once __DIR__ . '/../../includes/admin-header.php';
                         <div class="form-text small">e.g. S,M,L,XL or 38,40,42,44</div>
                     </div>
 
-                    <div class="col-md-4">
-                        <label class="form-label">Colors (Comma-separated)</label>
-                        <input type="text" name="colors" class="form-control" value="<?= isset($_POST['colors']) ? e($_POST['colors']) : 'Emerald Green,Midnight Black,Ivory White' ?>">
-                        <div class="form-text small">e.g. Emerald Green,Ivory White</div>
+                    <!-- Hidden/Synced colors input for compatibility -->
+                    <input type="hidden" name="colors" id="hiddenColorsInput" value="<?= isset($_POST['colors']) ? e($_POST['colors']) : 'Emerald Green,Midnight Black' ?>">
+
+                    <!-- Dynamic Colors & Color-Specific Photos Section -->
+                    <div class="col-12">
+                        <div class="p-3 bg-offwhite rounded border border-gold-subtle">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <div>
+                                    <label class="form-label fw-bold text-emerald mb-0">
+                                        <i class="fas fa-palette text-gold me-2"></i>Product Colors &amp; Dedicated Photos
+                                    </label>
+                                    <div class="small text-muted">Add each garment color with its matching photo. Customers will see this exact photo when selecting that color!</div>
+                                </div>
+                                <button type="button" class="btn btn-luxury-primary btn-sm" onclick="addColorRow()">
+                                    <i class="fas fa-plus me-1"></i> Add Another Color
+                                </button>
+                            </div>
+
+                            <div id="colorRowsContainer" class="d-flex flex-column gap-3 mt-3">
+                                <!-- Default Color 1 -->
+                                <div class="color-row p-3 bg-white rounded border d-flex flex-wrap align-items-center gap-3">
+                                    <div style="flex: 1; min-width: 180px;">
+                                        <label class="small fw-bold text-emerald mb-1 d-block">Color Name</label>
+                                        <input type="text" name="color_names[]" class="form-control form-control-sm color-name-input" placeholder="e.g. Emerald Green" value="Emerald Green" required>
+                                    </div>
+                                    <div style="flex: 2; min-width: 240px;">
+                                        <label class="small fw-bold text-emerald mb-1 d-block">Color Photo (Displays when user clicks this color)</label>
+                                        <input type="file" name="color_images[]" class="form-control form-control-sm" accept="image/jpeg,image/png,image/webp">
+                                    </div>
+                                    <div class="pt-3">
+                                        <button type="button" class="btn btn-outline-danger btn-sm" onclick="removeColorRow(this)" title="Delete Color">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Default Color 2 -->
+                                <div class="color-row p-3 bg-white rounded border d-flex flex-wrap align-items-center gap-3">
+                                    <div style="flex: 1; min-width: 180px;">
+                                        <label class="small fw-bold text-emerald mb-1 d-block">Color Name</label>
+                                        <input type="text" name="color_names[]" class="form-control form-control-sm color-name-input" placeholder="e.g. Midnight Black" value="Midnight Black" required>
+                                    </div>
+                                    <div style="flex: 2; min-width: 240px;">
+                                        <label class="small fw-bold text-emerald mb-1 d-block">Color Photo (Displays when user clicks this color)</label>
+                                        <input type="file" name="color_images[]" class="form-control form-control-sm" accept="image/jpeg,image/png,image/webp">
+                                    </div>
+                                    <div class="pt-3">
+                                        <button type="button" class="btn btn-outline-danger btn-sm" onclick="removeColorRow(this)" title="Delete Color">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Descriptions -->
@@ -290,6 +371,39 @@ document.getElementById('product_name')?.addEventListener('input', function() {
 document.getElementById('product_slug')?.addEventListener('input', function() {
     this.dataset.touched = "true";
 });
+</script>
+
+<script>
+function addColorRow(colorName = '') {
+    const container = document.getElementById('colorRowsContainer');
+    const row = document.createElement('div');
+    row.className = 'color-row p-3 bg-white rounded border d-flex flex-wrap align-items-center gap-3 animate__animated animate__fadeIn';
+    row.innerHTML = `
+        <div style="flex: 1; min-width: 180px;">
+            <label class="small fw-bold text-emerald mb-1 d-block">Color Name</label>
+            <input type="text" name="color_names[]" class="form-control form-control-sm color-name-input" placeholder="e.g. Ivory White" value="${colorName}" required>
+        </div>
+        <div style="flex: 2; min-width: 240px;">
+            <label class="small fw-bold text-emerald mb-1 d-block">Color Photo (Displays when user clicks this color)</label>
+            <input type="file" name="color_images[]" class="form-control form-control-sm" accept="image/jpeg,image/png,image/webp">
+        </div>
+        <div class="pt-3">
+            <button type="button" class="btn btn-outline-danger btn-sm" onclick="removeColorRow(this)" title="Delete Color">
+                <i class="fas fa-trash-alt"></i>
+            </button>
+        </div>
+    `;
+    container.appendChild(row);
+}
+
+function removeColorRow(btn) {
+    const rows = document.querySelectorAll('#colorRowsContainer .color-row');
+    if (rows.length > 1) {
+        btn.closest('.color-row').remove();
+    } else {
+        alert('At least one color is required.');
+    }
+}
 </script>
 
 <?php require_once __DIR__ . '/../../includes/admin-footer.php'; ?>

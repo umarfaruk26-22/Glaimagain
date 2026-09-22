@@ -24,7 +24,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     requireCsrfToken();
     $action = $_POST['action'] ?? '';
 
-    if ($action === 'upload') {
+    if ($action === 'update_color') {
+        $imageId = (int)($_POST['image_id'] ?? 0);
+        $color = trim($_POST['color'] ?? '');
+        $pdo->prepare("UPDATE product_images SET color = ? WHERE id = ? AND product_id = ?")
+            ->execute([$color ?: null, $imageId, $productId]);
+        setFlashMessage('success', 'Image color association updated.');
+        header('Location: ' . BASE_URL . 'admin/products/images.php?id=' . $productId);
+        exit;
+    } elseif ($action === 'upload') {
         if (!empty($_FILES['images']['name'][0])) {
             $fileCount = count($_FILES['images']['name']);
             $uploadedCount = 0;
@@ -117,6 +125,17 @@ require_once __DIR__ . '/../../includes/admin-header.php';
                     <div class="p-2 border rounded <?= $img['is_primary'] ? 'border-gold bg-offwhite shadow-sm' : 'border-light' ?> text-center position-relative">
                         <img src="<?= getProductImageUrl($img['image_path']) ?>" alt="Gallery Image" class="img-fluid rounded mb-2" style="height: 220px; width: 100%; object-fit: cover;">
 
+                        <!-- Color Association -->
+                        <form method="POST" action="<?= BASE_URL ?>admin/products/images.php?id=<?= $productId ?>" class="my-2">
+                            <?= csrfField() ?>
+                            <input type="hidden" name="action" value="update_color">
+                            <input type="hidden" name="image_id" value="<?= $img['id'] ?>">
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text bg-white" style="font-size: 11px;"><i class="fas fa-palette text-gold"></i></span>
+                                <input type="text" name="color" class="form-control form-control-sm" placeholder="Assign Color..." value="<?= e($img['color'] ?? '') ?>" style="font-size: 11px;">
+                                <button type="submit" class="btn btn-outline-secondary btn-sm" title="Save Color"><i class="fas fa-check"></i></button>
+                            </div>
+                        </form>
                         <div class="d-flex justify-content-between align-items-center pt-2 border-top">
                             <?php if ($img['is_primary']): ?>
                                 <span class="badge bg-gold text-dark fw-bold small"><i class="fas fa-star me-1"></i>PRIMARY</span>
