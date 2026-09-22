@@ -140,12 +140,13 @@ require_once __DIR__ . '/includes/header.php';
                                 </select>
                             </div>
                             <div class="col-12 mt-3">
-                                <div class="p-2 px-3 bg-white rounded border d-flex align-items-center justify-content-between">
-                                    <div class="small text-muted">
-                                        <i class="fas fa-check-circle text-success me-1"></i> Address will automatically save to your profile for future 1-click orders.
+                                <div class="checkout-save-address-box p-3 bg-white rounded-3 border border-gold-subtle shadow-sm d-flex flex-column flex-sm-row align-items-stretch align-items-sm-center justify-content-between gap-3">
+                                    <div class="small text-muted d-flex align-items-center">
+                                        <i class="fas fa-check-circle text-emerald fs-5 me-2 flex-shrink-0"></i>
+                                        <span>Address will automatically save to your profile for future 1-click orders.</span>
                                     </div>
-                                    <button type="button" id="btnSaveAddressAjax" class="btn btn-sm btn-luxury-primary">
-                                        <i class="fas fa-save me-1"></i> Save &amp; Select
+                                    <button type="button" id="btnSaveAddressAjax" class="btn btn-luxury-primary btn-save-address-mobile">
+                                        <i class="fas fa-save me-2"></i> Save &amp; Select Address
                                     </button>
                                 </div>
                             </div>
