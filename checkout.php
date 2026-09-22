@@ -45,9 +45,9 @@ require_once __DIR__ . '/includes/header.php';
 </div>
 
 <div class="container py-5">
-    <div class="row g-5">
+    <div class="row g-4 g-lg-5 checkout-container-mobile">
         <!-- 1. Left Column: Address Selection & Notes -->
-        <div class="col-lg-7">
+        <div class="col-lg-7 checkout-address-card-mobile">
             <div class="p-4 p-md-5 bg-white border border-gold-subtle rounded shadow-sm mb-4">
                 <div class="d-flex justify-content-between align-items-center mb-4">
                     <h4 class="fw-bold text-emerald mb-0">1. DELIVERY DESTINATION</h4>
@@ -162,7 +162,7 @@ require_once __DIR__ . '/includes/header.php';
         </div>
 
         <!-- 2. Right Column: Live Calculated Summary & Razorpay Trigger -->
-        <div class="col-lg-5">
+        <div class="col-lg-5 checkout-summary-card-mobile">
             <div class="p-4 p-md-5 bg-white border border-gold-subtle rounded shadow-sm sticky-top" style="top: 100px;">
                 <h5 class="cart-summary-title">2. COMMISSION SUMMARY</h5>
 
@@ -211,7 +211,7 @@ require_once __DIR__ . '/includes/header.php';
                 </div>
 
                 <!-- Pay Button -->
-                <button type="button" id="btnPayNow" class="btn btn-luxury-gold w-100 py-3 mt-4">
+                <button type="button" id="btnPayNow" class="btn btn-luxury-gold w-100 py-3 mt-4 btn-pay-mobile-cta">
                     <i class="fas fa-lock me-2"></i> PAY <?= formatPrice($cart['grand_total']) ?> WITH RAZORPAY
                 </button>
 
@@ -224,6 +224,18 @@ require_once __DIR__ . '/includes/header.php';
                 </div>
             </div>
         </div>
+    </div>
+</div>
+<!-- Mobile Sticky Bottom Pay Bar (Amazon/Myntra Style for 1-Tap Mobile Payment) -->
+<div class="checkout-mobile-sticky-bar d-lg-none">
+    <div class="container d-flex align-items-center justify-content-between p-0">
+        <div>
+            <span class="d-block text-muted" style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;">Grand Total</span>
+            <strong class="text-forest fs-5"><?= formatPrice($cart['grand_total']) ?></strong>
+        </div>
+        <button type="button" class="btn btn-luxury-gold px-4 py-2" onclick="document.getElementById('btnPayNow').click();" style="border-radius: 9999px; font-weight: 700; font-size: 13px;">
+            <i class="fas fa-lock me-1"></i> PAY NOW
+        </button>
     </div>
 </div>
 

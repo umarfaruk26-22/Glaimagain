@@ -51,6 +51,113 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 3. Update Cart Badge Count
     updateCartBadge();
+
+    // 4. Mobile Side Navigation Drawer (Smooth 60fps Hardware-Accelerated)
+    const navToggleBtn = document.getElementById('btnMobileNavToggle');
+    const navCloseBtn = document.getElementById('btnMobileNavClose');
+    const navDrawer = document.getElementById('mobileNavDrawer');
+    const navBackdrop = document.getElementById('mobileNavBackdrop');
+
+    function openMobileNav() {
+        if (navDrawer && navBackdrop) {
+            navDrawer.classList.add('active');
+            navBackdrop.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+    }
+
+    function closeMobileNav() {
+        if (navDrawer && navBackdrop) {
+            navDrawer.classList.remove('active');
+            navBackdrop.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+    }
+
+    if (navToggleBtn) {
+        navToggleBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            openMobileNav();
+        });
+    }
+    if (navCloseBtn) {
+        navCloseBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            closeMobileNav();
+        });
+    }
+    if (navBackdrop) {
+        navBackdrop.addEventListener('click', closeMobileNav);
+    }
+
+    if (navDrawer) {
+        navDrawer.querySelectorAll('.mobile-nav-item:not(.mobile-nav-accordion-btn), .mobile-subnav-item').forEach(link => {
+            link.addEventListener('click', () => {
+                closeMobileNav();
+            });
+        });
+    }
+
+    // 5. Best Sellers 3-Second Automatic Horizontal Scroll
+    const bestSellersTrack = document.getElementById('bestSellersScrollTrack');
+    if (bestSellersTrack) {
+        let autoScrollInterval = null;
+        let isUserInteracting = false;
+        let resumeTimeout = null;
+
+        function getScrollStep() {
+            const firstCol = bestSellersTrack.querySelector('.best-seller-col');
+            return firstCol ? (firstCol.offsetWidth + 16) : 260;
+        }
+
+        function autoScrollNext() {
+            if (isUserInteracting) return;
+            const step = getScrollStep();
+            const maxScroll = bestSellersTrack.scrollWidth - bestSellersTrack.clientWidth;
+
+            if (bestSellersTrack.scrollLeft >= maxScroll - 15) {
+                bestSellersTrack.scrollTo({ left: 0, behavior: 'smooth' });
+            } else {
+                bestSellersTrack.scrollBy({ left: step, behavior: 'smooth' });
+            }
+        }
+
+        function startAutoScroll() {
+            if (autoScrollInterval) clearInterval(autoScrollInterval);
+            autoScrollInterval = setInterval(autoScrollNext, 3000);
+        }
+
+        function pauseAutoScroll() {
+            isUserInteracting = true;
+            if (resumeTimeout) clearTimeout(resumeTimeout);
+            resumeTimeout = setTimeout(() => {
+                isUserInteracting = false;
+            }, 4500);
+        }
+
+        startAutoScroll();
+
+        bestSellersTrack.addEventListener('mouseenter', () => { isUserInteracting = true; });
+        bestSellersTrack.addEventListener('mouseleave', () => { isUserInteracting = false; });
+        bestSellersTrack.addEventListener('touchstart', pauseAutoScroll, { passive: true });
+        bestSellersTrack.addEventListener('touchmove', pauseAutoScroll, { passive: true });
+
+        const prevBtn = document.getElementById('btnBestSellerPrev');
+        const nextBtn = document.getElementById('btnBestSellerNext');
+        if (prevBtn) {
+            prevBtn.addEventListener('click', () => {
+                pauseAutoScroll();
+                bestSellersTrack.scrollBy({ left: -getScrollStep(), behavior: 'smooth' });
+            });
+        }
+        if (nextBtn) {
+            nextBtn.addEventListener('click', () => {
+                pauseAutoScroll();
+                bestSellersTrack.scrollBy({ left: getScrollStep(), behavior: 'smooth' });
+            });
+        }
+    }
+
 });
 
 /**

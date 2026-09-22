@@ -52,8 +52,31 @@ $availableColors = array_filter(array_map('trim', explode(',', $product['colors'
 
 // Handle Review Submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'submit_review') {
-    requireCsrfToken();
-    requireUserLogin();
+    $isAjax = (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest') || (isset($_POST['is_ajax']) && $_POST['is_ajax'] === '1');
+
+    if (!verifyCsrfToken()) {
+        if ($isAjax) {
+            http_response_code(403);
+            header('Content-Type: application/json');
+            echo json_encode(['success' => false, 'message' => 'Security token expired. Please reload the page.']);
+            exit;
+        }
+        setFlashMessage('danger', 'Security token expired. Please reload the page and try again.');
+        header('Location: ' . BASE_URL . 'product/' . urlencode($slug) . '#reviews');
+        exit;
+    }
+
+    if (!isUserLoggedIn()) {
+        if ($isAjax) {
+            http_response_code(401);
+            header('Content-Type: application/json');
+            echo json_encode(['success' => false, 'message' => 'Please sign in to your GLAIMAGAIN account to submit a review.']);
+            exit;
+        }
+        setFlashMessage('warning', 'Please sign in to your GLAIMAGAIN account to submit a review.');
+        header('Location: ' . BASE_URL . 'login.php');
+        exit;
+    }
 
     $rating = max(1, min(5, (int)($_POST['rating'] ?? 5)));
     $reviewTitle = trim($_POST['title'] ?? '');
@@ -66,11 +89,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             VALUES (?, ?, ?, ?, ?, 'approved')
         ");
         $insReview->execute([$product['id'], $currentUser['id'], $rating, $reviewTitle, $reviewComment]);
+
+        if ($isAjax) {
+            header('Content-Type: application/json');
+            echo json_encode([
+                'success' => true,
+                'message' => 'Thank you for your review. It has been published.',
+                'review' => [
+                    'rating' => $rating,
+                    'title' => htmlspecialchars($reviewTitle, ENT_QUOTES, 'UTF-8'),
+                    'comment' => htmlspecialchars($reviewComment, ENT_QUOTES, 'UTF-8'),
+                    'author' => htmlspecialchars($currentUser['first_name'] . ' ' . $currentUser['last_name'], ENT_QUOTES, 'UTF-8'),
+                    'date' => date('M d, Y')
+                ]
+            ]);
+            exit;
+        }
+
         setFlashMessage('success', 'Thank you for your review. It has been published.');
-        header('Location: ' . BASE_URL . 'product.php?slug=' . urlencode($slug) . '#reviews');
+        header('Location: ' . BASE_URL . 'product/' . urlencode($slug) . '#reviews');
         exit;
     } else {
+        if ($isAjax) {
+            http_response_code(400);
+            header('Content-Type: application/json');
+            echo json_encode(['success' => false, 'message' => 'Please provide both a title and comments for your review.']);
+            exit;
+        }
         setFlashMessage('danger', 'Please provide both a title and comments for your review.');
+        header('Location: ' . BASE_URL . 'product/' . urlencode($slug) . '#reviews');
+        exit;
     }
 }
 
@@ -317,7 +365,7 @@ require_once __DIR__ . '/includes/header.php';
                 <div class="p-4 bg-offwhite border border-gold-subtle rounded shadow-sm">
                     <h5 class="fw-bold text-emerald mb-3">LEAVE A REVIEW</h5>
                     <?php if (isUserLoggedIn()): ?>
-                        <form method="POST" action="<?= BASE_URL ?>product.php?slug=<?= urlencode($slug) ?>">
+                        <form method="POST" action="<?= BASE_URL ?>product/<?= urlencode($slug) ?>#reviews" id="reviewForm">
                             <?= csrfField() ?>
                             <input type="hidden" name="action" value="submit_review">
 
@@ -475,6 +523,77 @@ async function buyNowDirect() {
     setTimeout(() => {
         window.location.href = "<?= BASE_URL ?>checkout.php";
     }, 600);
+}
+
+// AJAX Review Form Handling (Zero page reload / redirection glitches on mobile)
+const reviewForm = document.getElementById('reviewForm');
+if (reviewForm) {
+    reviewForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const submitBtn = reviewForm.querySelector('button[type="submit"]');
+        const originalBtnText = submitBtn.innerHTML;
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> SUBMITTING...';
+
+        const formData = new FormData(reviewForm);
+        formData.append('is_ajax', '1');
+
+        try {
+            const resp = await fetch(reviewForm.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+            const data = await resp.json();
+
+            if (data.success) {
+                if (typeof showToast === 'function') {
+                    showToast(data.message, 'success');
+                } else {
+                    alert(data.message);
+                }
+                reviewForm.reset();
+
+                // Dynamically append new review card
+                const reviewsContainer = document.querySelector('#reviews .d-flex.flex-column');
+                if (reviewsContainer && data.review) {
+                    let starsHtml = '';
+                    for (let i = 1; i <= 5; i++) {
+                        starsHtml += `<i class="fas fa-star ${i <= data.review.rating ? '' : 'text-muted'}" style="font-size: 12px;"></i> `;
+                    }
+                    const newCard = document.createElement('div');
+                    newCard.className = 'p-4 bg-white border border-gold-subtle rounded shadow-sm mb-3 animate__animated animate__fadeIn';
+                    newCard.innerHTML = `
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <div class="text-gold">${starsHtml}</div>
+                            <span class="text-muted small">${data.review.date}</span>
+                        </div>
+                        <h6 class="fw-bold text-emerald mb-1">${data.review.title}</h6>
+                        <p class="text-muted small mb-2">${data.review.comment}</p>
+                        <div class="small text-muted">
+                            <i class="fas fa-user-check text-gold me-1"></i>${data.review.author} <span class="badge bg-emerald text-gold ms-1">Verified Patron</span>
+                        </div>
+                    `;
+                    reviewsContainer.prepend(newCard);
+                }
+            } else {
+                if (typeof showToast === 'function') {
+                    showToast(data.message || 'Error submitting review.', 'error');
+                } else {
+                    alert(data.message || 'Error submitting review.');
+                }
+            }
+        } catch (err) {
+            console.error('Review submit error:', err);
+            // Fallback to normal submit if network error occurs
+            reviewForm.submit();
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalBtnText;
+        }
+    });
 }
 </script>
 

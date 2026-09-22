@@ -50,18 +50,18 @@ $metaDescription = $metaDescription ?? getSetting('meta_description', 'GLAIMAGAI
     <header class="main-header-clean">
         <div class="container">
             <nav class="navbar navbar-expand-lg p-0">
-                <!-- Mobile Menu Button -->
-                <button class="navbar-toggler border-0 me-2" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain" aria-controls="navbarMain" aria-expanded="false" aria-label="Toggle navigation">
+                <!-- Mobile Menu Toggler (Left on Mobile) -->
+                <button class="navbar-toggler border-0 me-2" type="button" id="btnMobileNavToggle" aria-label="Open Navigation Menu">
                     <span class="navbar-toggler-icon"></span>
                 </button>
 
-                <!-- Brand Logo (Official GLAIMAGAIN Logo) -->
-                <a class="navbar-brand py-2 me-4 d-flex align-items-center" href="<?= BASE_URL ?>">
+                <!-- Brand Logo (Centered on Mobile, Left on Desktop) -->
+                <a class="navbar-brand py-2 d-flex align-items-center" href="<?= BASE_URL ?>">
                     <img src="<?= BASE_URL ?>assets/images/glaimagain-logo.jpg" alt="GLAIMAGAIN" class="brand-logo-img rounded">
                 </a>
 
-                <!-- Navigation Menu Links -->
-                <div class="collapse navbar-collapse" id="navbarMain">
+                <!-- Desktop Navigation Menu Links (Hidden on Mobile) -->
+                <div class="collapse navbar-collapse d-none d-lg-flex" id="navbarMain">
                     <ul class="navbar-nav mx-auto mb-2 mb-lg-0">
                         <li class="nav-item">
                             <a class="nav-link-modern <?= (basename($_SERVER['PHP_SELF']) == 'index.php') ? 'active' : '' ?>" href="<?= BASE_URL ?>">HOME</a>
@@ -99,8 +99,8 @@ $metaDescription = $metaDescription ?? getSetting('meta_description', 'GLAIMAGAI
                     </ul>
                 </div>
 
-                <!-- Right Action Buttons (Search, Bag, Login) -->
-                <div class="d-flex align-items-center gap-2">
+                <!-- Right Action Buttons (Search, Bag, Login - Right on both Mobile & Desktop) -->
+                <div class="header-right-actions d-flex align-items-center gap-2">
                     <!-- Search Trigger -->
                     <a href="#" class="action-icon-btn btn-search-trigger" title="Search Garments" aria-label="Search">
                         <i class="fas fa-search"></i>
@@ -116,7 +116,7 @@ $metaDescription = $metaDescription ?? getSetting('meta_description', 'GLAIMAGAI
                     <?php if ($currentUser): ?>
                         <div class="dropdown">
                             <a href="#" class="btn-nav-login dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-                                <i class="fas fa-user-circle"></i> <?= e($currentUser['first_name']) ?>
+                                <i class="fas fa-user-circle"></i> <span class="d-none d-sm-inline"><?= e($currentUser['first_name']) ?></span>
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end" style="min-width: 220px;">
                                 <li class="px-3 py-2 border-bottom mb-1" style="background: rgba(1, 60, 38, 0.04); border-radius: 8px;">
@@ -132,14 +132,106 @@ $metaDescription = $metaDescription ?? getSetting('meta_description', 'GLAIMAGAI
                             </ul>
                         </div>
                     <?php else: ?>
-                        <a href="<?= BASE_URL ?>login.php" class="btn-nav-login">
-                            LOGIN
+                        <a href="<?= BASE_URL ?>login.php" class="btn-nav-login" title="Sign In">
+                            <i class="fas fa-user d-inline d-sm-none"></i>
+                            <span class="d-none d-sm-inline">LOGIN</span>
                         </a>
                     <?php endif; ?>
                 </div>
             </nav>
         </div>
     </header>
+
+    <!-- Buttery-Smooth Mobile Side Navigation Drawer (Hardware-Accelerated, Zero Lag) -->
+    <div class="mobile-nav-backdrop" id="mobileNavBackdrop"></div>
+    <div class="mobile-nav-drawer" id="mobileNavDrawer" aria-hidden="true">
+        <div class="mobile-nav-header">
+            <div class="d-flex align-items-center gap-2">
+                <img src="<?= BASE_URL ?>assets/images/glaimagain-logo.jpg" alt="GLAIMAGAIN" class="mobile-drawer-logo rounded">
+                <div>
+                    <div class="mobile-drawer-brand-title">GLAIMAGAIN</div>
+                    <div class="mobile-drawer-brand-sub">FASHION BEYOND TODAY</div>
+                </div>
+            </div>
+            <button type="button" class="mobile-nav-close-btn" id="btnMobileNavClose" aria-label="Close Menu">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <div class="mobile-nav-body">
+            <div class="mobile-nav-list">
+                <a href="<?= BASE_URL ?>" class="mobile-nav-item <?= (basename($_SERVER['PHP_SELF']) == 'index.php') ? 'active' : '' ?>">
+                    <span><i class="fas fa-home me-2 text-gold"></i> HOME</span>
+                    <i class="fas fa-chevron-right arrow-icon"></i>
+                </a>
+                <a href="<?= BASE_URL ?>shop.php" class="mobile-nav-item <?= (basename($_SERVER['PHP_SELF']) == 'shop.php' && empty($_GET['category'])) ? 'active' : '' ?>">
+                    <span><i class="fas fa-tshirt me-2 text-gold"></i> ALL APPAREL</span>
+                    <i class="fas fa-chevron-right arrow-icon"></i>
+                </a>
+                <a href="<?= BASE_URL ?>shop.php?category=men" class="mobile-nav-item <?= (isset($_GET['category']) && $_GET['category'] == 'men') ? 'active' : '' ?>">
+                    <span><i class="fas fa-male me-2 text-gold"></i> MEN'S COLLECTION</span>
+                    <i class="fas fa-chevron-right arrow-icon"></i>
+                </a>
+                <a href="<?= BASE_URL ?>shop.php?category=women" class="mobile-nav-item <?= (isset($_GET['category']) && $_GET['category'] == 'women') ? 'active' : '' ?>">
+                    <span><i class="fas fa-female me-2 text-gold"></i> WOMEN'S COLLECTION</span>
+                    <i class="fas fa-chevron-right arrow-icon"></i>
+                </a>
+
+                <!-- Collapsible Boutique Categories inside drawer -->
+                <div class="mobile-nav-group">
+                    <button class="mobile-nav-item mobile-nav-accordion-btn" type="button" data-bs-toggle="collapse" data-bs-target="#drawerCategories" aria-expanded="false">
+                        <span><i class="fas fa-crown me-2 text-gold"></i> BOUTIQUE CATEGORIES</span>
+                        <i class="fas fa-chevron-down arrow-icon"></i>
+                    </button>
+                    <div class="collapse" id="drawerCategories">
+                        <div class="mobile-subnav-list">
+                            <?php foreach ($activeCategories as $cat): ?>
+                                <a href="<?= BASE_URL ?>shop.php?category=<?= urlencode($cat['slug']) ?>" class="mobile-subnav-item">
+                                    <i class="fas fa-sparkles me-2 text-gold-subtle"></i> <?= e($cat['name']) ?>
+                                </a>
+                            <?php endforeach; ?>
+                        </div>
+                    </div>
+                </div>
+
+                <a href="<?= BASE_URL ?>about.php" class="mobile-nav-item <?= (basename($_SERVER['PHP_SELF']) == 'about.php') ? 'active' : '' ?>">
+                    <span><i class="fas fa-gem me-2 text-gold"></i> MAISON &amp; HERITAGE</span>
+                    <i class="fas fa-chevron-right arrow-icon"></i>
+                </a>
+                <a href="<?= BASE_URL ?>contact.php" class="mobile-nav-item <?= (basename($_SERVER['PHP_SELF']) == 'contact.php') ? 'active' : '' ?>">
+                    <span><i class="fas fa-concierge-bell me-2 text-gold"></i> CONCIERGE</span>
+                    <i class="fas fa-chevron-right arrow-icon"></i>
+                </a>
+            </div>
+        </div>
+
+        <div class="mobile-nav-footer">
+            <?php if ($currentUser): ?>
+                <div class="mobile-user-card">
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                        <i class="fas fa-user-circle fs-4 text-gold"></i>
+                        <div>
+                            <div class="fw-bold text-forest small"><?= e($currentUser['first_name'] . ' ' . $currentUser['last_name']) ?></div>
+                            <div class="text-muted" style="font-size: 11px;">@<?= e($currentUser['username']) ?></div>
+                        </div>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <a href="<?= BASE_URL ?>account/profile.php" class="btn btn-sm btn-luxury-primary flex-fill" style="padding: 6px 10px; font-size: 11px;">Account</a>
+                        <a href="<?= BASE_URL ?>logout.php" class="btn btn-sm btn-outline-danger flex-fill" style="padding: 6px 10px; font-size: 11px;">Logout</a>
+                    </div>
+                </div>
+            <?php else: ?>
+                <div class="d-grid gap-2">
+                    <a href="<?= BASE_URL ?>login.php" class="btn btn-luxury-primary py-2 text-center" style="font-size: 12.5px;">
+                        <i class="fas fa-sign-in-alt me-2"></i> PATRON LOGIN
+                    </a>
+                    <a href="<?= BASE_URL ?>register.php" class="btn btn-outline-luxury py-2 text-center" style="font-size: 12.5px;">
+                        <i class="fas fa-user-plus me-2"></i> CREATE ACCOUNT
+                    </a>
+                </div>
+            <?php endif; ?>
+        </div>
+    </div>
 
     <!-- 3. Global Fullscreen Live Search Overlay -->
     <div class="search-overlay" id="searchOverlay">

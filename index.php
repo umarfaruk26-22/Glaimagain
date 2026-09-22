@@ -17,7 +17,7 @@ $bestSellersStmt = $pdo->query("
     FROM products p
     JOIN categories c ON p.category_id = c.id
     WHERE p.status = 'active'
-    ORDER BY p.is_best_seller DESC, p.views_count DESC, p.id DESC LIMIT 3
+    ORDER BY p.is_best_seller DESC, p.views_count DESC, p.id DESC LIMIT 8
 ");
 $bestSellers = $bestSellersStmt->fetchAll();
 
@@ -69,9 +69,7 @@ require_once __DIR__ . '/includes/header.php';
                         <span>START SHOPPING</span>
                         <i class="fas fa-arrow-right"></i>
                     </a>
-                    <a href="<?= BASE_URL ?>shop.php?category=luxury-t-shirts" class="btn-pill-outline-forest">
-                        <span>LUXURY TEES</span>
-                    </a>
+                    
                 </div>
             </div>
 
@@ -98,7 +96,7 @@ require_once __DIR__ . '/includes/header.php';
     </div>
 </section>
 
-<!-- 2. "Best Selling 🔥" Section (Dark Forest Green Container) -->
+<!-- 2. "Best Selling 🔥" Section (Dark Forest Green Container with 3s Auto-Scroll) -->
 <section class="container">
     <div class="best-selling-banner-section">
         <div class="best-selling-header">
@@ -106,7 +104,13 @@ require_once __DIR__ . '/includes/header.php';
                 <h2 class="best-selling-title">Best Selling 🔥</h2>
                 <p class="best-selling-desc">Dive into the latest trends with our handpicked top-selling fashion pieces</p>
             </div>
-            <div>
+            <div class="d-flex align-items-center gap-2">
+                <button type="button" class="btn-scroll-arrow" id="btnBestSellerPrev" aria-label="Previous Best Seller">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <button type="button" class="btn-scroll-arrow" id="btnBestSellerNext" aria-label="Next Best Seller">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
                 <a href="<?= BASE_URL ?>shop.php?sort=best_selling" class="btn-pill-white text-nowrap d-none d-sm-inline-flex">
                     <span>See All</span>
                     <i class="fas fa-arrow-right"></i>
@@ -114,9 +118,9 @@ require_once __DIR__ . '/includes/header.php';
             </div>
         </div>
 
-        <div class="row g-2 g-md-4">
+        <div class="best-sellers-scroll-track" id="bestSellersScrollTrack">
             <?php foreach ($bestSellers as $bs): ?>
-                <div class="col-4 col-md-4">
+                <div class="best-seller-col">
                     <a href="<?= BASE_URL ?>product.php?slug=<?= urlencode($bs['slug']) ?>" class="best-seller-card">
                         <div class="best-seller-img-wrap">
                             <img src="<?= getProductImageUrl($bs['primary_image']) ?>" alt="<?= e($bs['name']) ?>" loading="lazy">
@@ -125,8 +129,8 @@ require_once __DIR__ . '/includes/header.php';
                             <h6><?= e($bs['name']) ?></h6>
                             <div class="best-seller-meta">
                                 <strong><?= formatPrice($bs['selling_price']) ?></strong>
-                                <span class="d-none d-sm-inline">|</span>
-                                <span class="rating-pill d-none d-sm-inline-flex">5.0 ★</span>
+                                <span>|</span>
+                                <span class="rating-pill">5.0 ★</span>
                             </div>
                         </div>
                     </a>
