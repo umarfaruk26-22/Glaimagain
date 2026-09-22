@@ -1,0 +1,50 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /Glaimagain/
+
+    # 1. Hide .php extension: ONLY 301-redirect GET/HEAD requests so POST form data is NEVER dropped
+    RewriteCond %{REQUEST_METHOD} !^(POST|PUT|DELETE)$ [NC]
+    RewriteCond %{THE_REQUEST} ^[A-Z]{3,}\s/Glaimagain/([^\s?]+)\.php(\?[^\s]*)?\s [NC]
+    RewriteRule ^ %1 [R=301,L,QSA]
+
+    # 2. Allow existing files, directories, assets to be served directly
+    RewriteCond %{REQUEST_FILENAME} -d [OR]
+    RewriteCond %{REQUEST_FILENAME} -f
+    RewriteRule ^ - [L]
+
+    # 3. Dynamic Storefront Routes
+    RewriteRule ^product/([^/]+)/?$ product.php?slug=$1 [L,QSA]
+    RewriteRule ^category/([^/]+)/?$ shop.php?category=$1 [L,QSA]
+
+    # 4. Clean Admin Subfolder Routing
+    RewriteRule ^admin/?$ admin/dashboard.php [L,QSA]
+    RewriteRule ^admin/dashboard/?$ admin/dashboard.php [L,QSA]
+    RewriteRule ^admin/login/?$ admin/login.php [L,QSA]
+    RewriteRule ^admin/logout/?$ admin/logout.php [L,QSA]
+
+    # Admin Index handler for any subfolder (e.g. /admin/products or /admin/products/index)
+    RewriteRule ^admin/([a-zA-Z0-9_-]+)/index/?$ admin/$1/index.php [L,QSA]
+    RewriteRule ^admin/([a-zA-Z0-9_-]+)/?$ admin/$1/index.php [L,QSA]
+
+    # Admin Action handlers (add, edit, delete, view, images, reports, update-status)
+    RewriteRule ^admin/([a-zA-Z0-9_-]+)/add/?$ admin/$1/add.php [L,QSA]
+    RewriteRule ^admin/([a-zA-Z0-9_-]+)/edit/?$ admin/$1/edit.php [L,QSA]
+    RewriteRule ^admin/([a-zA-Z0-9_-]+)/delete/?$ admin/$1/delete.php [L,QSA]
+    RewriteRule ^admin/([a-zA-Z0-9_-]+)/view/?$ admin/$1/view.php [L,QSA]
+    RewriteRule ^admin/([a-zA-Z0-9_-]+)/images/?$ admin/$1/images.php [L,QSA]
+    RewriteRule ^admin/([a-zA-Z0-9_-]+)/reports/?$ admin/$1/reports.php [L,QSA]
+    RewriteRule ^admin/([a-zA-Z0-9_-]+)/update-status/?$ admin/$1/update-status.php [L,QSA]
+
+    # 5. Clean Customer Account Routing
+    RewriteRule ^account/?$ account/profile.php [L,QSA]
+    RewriteRule ^account/profile/?$ account/profile.php [L,QSA]
+    RewriteRule ^account/orders/?$ account/orders.php [L,QSA]
+    RewriteRule ^account/order-details/?$ account/order-details.php [L,QSA]
+    RewriteRule ^account/addresses/?$ account/addresses.php [L,QSA]
+    RewriteRule ^account/change-password/?$ account/change-password.php [L,QSA]
+    RewriteRule ^account/logout/?$ account/logout.php [L,QSA]
+
+    # 6. Generic Extensionless URL handler for root PHP files (e.g. /shop -> shop.php, /cart -> cart.php)
+    RewriteCond %{REQUEST_FILENAME}.php -f
+    RewriteRule ^([a-zA-Z0-9_-]+)/?$ $1.php [L,QSA]
+</IfModule>
