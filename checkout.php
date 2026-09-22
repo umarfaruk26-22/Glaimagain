@@ -168,15 +168,15 @@ require_once __DIR__ . '/includes/header.php';
                 <h5 class="cart-summary-title">2. COMMISSION SUMMARY</h5>
 
                 <!-- Items list snapshot -->
-                <div class="d-flex flex-column gap-3 mb-4 pb-3 border-bottom" style="max-height: 280px; overflow-y: auto;">
+                <div class="checkout-items-list mb-4 pb-3 border-bottom">
                     <?php foreach ($cart['items'] as $item): ?>
-                        <div class="d-flex align-items-center gap-3">
-                            <img src="<?= $item['image'] ?>" alt="<?= e($item['name']) ?>" style="width: 50px; height: 60px; object-fit: cover; border-radius: 2px;">
-                            <div class="flex-grow-1 small">
-                                <div class="fw-bold text-emerald text-truncate" style="max-width: 200px;"><?= e($item['name']) ?></div>
-                                <div class="text-muted"><?= e($item['size']) ?> / <?= e($item['color']) ?> &bull; Qty: <?= $item['quantity'] ?></div>
+                        <div class="checkout-product-item">
+                            <img src="<?= $item['image'] ?>" alt="<?= e($item['name']) ?>" class="checkout-product-thumb">
+                            <div class="checkout-product-info">
+                                <div class="checkout-product-title" title="<?= e($item['name']) ?>"><?= e($item['name']) ?></div>
+                                <div class="checkout-product-meta"><?= e($item['size']) ?> / <?= e($item['color']) ?> &bull; Qty: <?= $item['quantity'] ?></div>
                             </div>
-                            <div class="fw-bold text-emerald small">
+                            <div class="checkout-product-price">
                                 <?= formatPrice($item['subtotal']) ?>
                             </div>
                         </div>
@@ -208,7 +208,7 @@ require_once __DIR__ . '/includes/header.php';
 
                 <div class="summary-row total">
                     <span>Total Amount</span>
-                    <span class="text-gold fs-5"><?= formatPrice($cart['grand_total']) ?></span>
+                    <span class="total-price-simple fs-5"><?= formatPrice($cart['grand_total']) ?></span>
                 </div>
 
                 <!-- Pay Button -->

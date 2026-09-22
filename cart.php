@@ -181,7 +181,7 @@ require_once __DIR__ . '/includes/header.php';
 
                     <div class="summary-row total">
                         <span>Grand Total</span>
-                        <span class="text-gold"><?= formatPrice($cart['grand_total']) ?></span>
+                        <span class="total-price-simple"><?= formatPrice($cart['grand_total']) ?></span>
                     </div>
 
                     <a href="<?= BASE_URL ?>checkout.php" class="btn btn-luxury-gold w-100 py-3 mt-3 <?= $cart['has_out_of_stock'] ? 'disabled' : '' ?>">
