@@ -148,46 +148,79 @@ $metaDescription = $metaDescription ?? getSetting('meta_description', 'GLAIMAGAI
         <div class="mobile-nav-header">
             <div class="d-flex align-items-center gap-2">
                 <img src="<?= BASE_URL ?>assets/images/glaimagain-logo.jpg" alt="GLAIMAGAIN" class="mobile-drawer-logo rounded">
-                <div>
-                    <div class="mobile-drawer-brand-title">GLAIMAGAIN</div>
-                    <div class="mobile-drawer-brand-sub">FASHION BEYOND TODAY</div>
-                </div>
+                <span class="mobile-drawer-brand-title">GLAIMAGAIN</span>
             </div>
             <button type="button" class="mobile-nav-close-btn" id="btnMobileNavClose" aria-label="Close Menu">
                 <i class="fas fa-times"></i>
             </button>
         </div>
 
+        <!-- 1. Account Section At The TOP (No scroll needed) -->
+        <div class="mobile-nav-top-account">
+            <?php if ($currentUser): ?>
+                <div class="mobile-user-card">
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                        <i class="fas fa-user-circle fs-3 text-gold"></i>
+                        <div>
+                            <div class="fw-bold text-forest small"><?= e($currentUser['first_name'] . ' ' . $currentUser['last_name']) ?></div>
+                            <div class="text-muted" style="font-size: 11px;">@<?= e($currentUser['username']) ?></div>
+                        </div>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <a href="<?= BASE_URL ?>account/profile.php" class="btn btn-sm btn-luxury-primary flex-fill" style="padding: 6px 10px; font-size: 12px; font-weight: 600;">
+                            <i class="fas fa-id-card me-1"></i> Account
+                        </a>
+                        <a href="<?= BASE_URL ?>account/orders.php" class="btn btn-sm btn-outline-luxury flex-fill" style="padding: 6px 10px; font-size: 12px; font-weight: 600;">
+                            <i class="fas fa-box me-1"></i> Orders
+                        </a>
+                        <a href="<?= BASE_URL ?>logout.php" class="btn btn-sm btn-outline-danger" style="padding: 6px 10px; font-size: 12px; font-weight: 600;" title="Sign Out">
+                            <i class="fas fa-sign-out-alt"></i>
+                        </a>
+                    </div>
+                </div>
+            <?php else: ?>
+                <div class="d-flex gap-2">
+                    <a href="<?= BASE_URL ?>login.php" class="btn btn-luxury-primary flex-fill py-2 text-center" style="font-size: 12.5px;">
+                        <i class="fas fa-sign-in-alt me-1"></i> LOGIN
+                    </a>
+                    <a href="<?= BASE_URL ?>register.php" class="btn btn-outline-luxury flex-fill py-2 text-center" style="font-size: 12.5px;">
+                        <i class="fas fa-user-plus me-1"></i> REGISTER
+                    </a>
+                </div>
+            <?php endif; ?>
+        </div>
+
+        <!-- 2. Clean Page Links (Exact Same Names as Desktop View) -->
         <div class="mobile-nav-body">
             <div class="mobile-nav-list">
                 <a href="<?= BASE_URL ?>" class="mobile-nav-item <?= (basename($_SERVER['PHP_SELF']) == 'index.php') ? 'active' : '' ?>">
-                    <span><i class="fas fa-home me-2 text-gold"></i> HOME</span>
+                    <span>HOME</span>
                     <i class="fas fa-chevron-right arrow-icon"></i>
                 </a>
                 <a href="<?= BASE_URL ?>shop.php" class="mobile-nav-item <?= (basename($_SERVER['PHP_SELF']) == 'shop.php' && empty($_GET['category'])) ? 'active' : '' ?>">
-                    <span><i class="fas fa-tshirt me-2 text-gold"></i> ALL APPAREL</span>
+                    <span>SHOP</span>
                     <i class="fas fa-chevron-right arrow-icon"></i>
                 </a>
                 <a href="<?= BASE_URL ?>shop.php?category=men" class="mobile-nav-item <?= (isset($_GET['category']) && $_GET['category'] == 'men') ? 'active' : '' ?>">
-                    <span><i class="fas fa-male me-2 text-gold"></i> MEN'S COLLECTION</span>
+                    <span>MEN</span>
                     <i class="fas fa-chevron-right arrow-icon"></i>
                 </a>
                 <a href="<?= BASE_URL ?>shop.php?category=women" class="mobile-nav-item <?= (isset($_GET['category']) && $_GET['category'] == 'women') ? 'active' : '' ?>">
-                    <span><i class="fas fa-female me-2 text-gold"></i> WOMEN'S COLLECTION</span>
+                    <span>WOMEN</span>
                     <i class="fas fa-chevron-right arrow-icon"></i>
                 </a>
 
-                <!-- Collapsible Boutique Categories inside drawer -->
+                <!-- COLLECTIONS Dropdown Accordion -->
                 <div class="mobile-nav-group">
                     <button class="mobile-nav-item mobile-nav-accordion-btn" type="button" data-bs-toggle="collapse" data-bs-target="#drawerCategories" aria-expanded="false">
-                        <span><i class="fas fa-crown me-2 text-gold"></i> BOUTIQUE CATEGORIES</span>
+                        <span>COLLECTIONS</span>
                         <i class="fas fa-chevron-down arrow-icon"></i>
                     </button>
                     <div class="collapse" id="drawerCategories">
                         <div class="mobile-subnav-list">
                             <?php foreach ($activeCategories as $cat): ?>
                                 <a href="<?= BASE_URL ?>shop.php?category=<?= urlencode($cat['slug']) ?>" class="mobile-subnav-item">
-                                    <i class="fas fa-sparkles me-2 text-gold-subtle"></i> <?= e($cat['name']) ?>
+                                    <i class="fas fa-chevron-right me-2 text-gold" style="font-size: 10px;"></i><?= e($cat['name']) ?>
                                 </a>
                             <?php endforeach; ?>
                         </div>
@@ -195,41 +228,14 @@ $metaDescription = $metaDescription ?? getSetting('meta_description', 'GLAIMAGAI
                 </div>
 
                 <a href="<?= BASE_URL ?>about.php" class="mobile-nav-item <?= (basename($_SERVER['PHP_SELF']) == 'about.php') ? 'active' : '' ?>">
-                    <span><i class="fas fa-gem me-2 text-gold"></i> MAISON &amp; HERITAGE</span>
+                    <span>ABOUT</span>
                     <i class="fas fa-chevron-right arrow-icon"></i>
                 </a>
                 <a href="<?= BASE_URL ?>contact.php" class="mobile-nav-item <?= (basename($_SERVER['PHP_SELF']) == 'contact.php') ? 'active' : '' ?>">
-                    <span><i class="fas fa-concierge-bell me-2 text-gold"></i> CONCIERGE</span>
+                    <span>CONTACT</span>
                     <i class="fas fa-chevron-right arrow-icon"></i>
                 </a>
             </div>
-        </div>
-
-        <div class="mobile-nav-footer">
-            <?php if ($currentUser): ?>
-                <div class="mobile-user-card">
-                    <div class="d-flex align-items-center gap-2 mb-2">
-                        <i class="fas fa-user-circle fs-4 text-gold"></i>
-                        <div>
-                            <div class="fw-bold text-forest small"><?= e($currentUser['first_name'] . ' ' . $currentUser['last_name']) ?></div>
-                            <div class="text-muted" style="font-size: 11px;">@<?= e($currentUser['username']) ?></div>
-                        </div>
-                    </div>
-                    <div class="d-flex gap-2">
-                        <a href="<?= BASE_URL ?>account/profile.php" class="btn btn-sm btn-luxury-primary flex-fill" style="padding: 6px 10px; font-size: 11px;">Account</a>
-                        <a href="<?= BASE_URL ?>logout.php" class="btn btn-sm btn-outline-danger flex-fill" style="padding: 6px 10px; font-size: 11px;">Logout</a>
-                    </div>
-                </div>
-            <?php else: ?>
-                <div class="d-grid gap-2">
-                    <a href="<?= BASE_URL ?>login.php" class="btn btn-luxury-primary py-2 text-center" style="font-size: 12.5px;">
-                        <i class="fas fa-sign-in-alt me-2"></i> PATRON LOGIN
-                    </a>
-                    <a href="<?= BASE_URL ?>register.php" class="btn btn-outline-luxury py-2 text-center" style="font-size: 12.5px;">
-                        <i class="fas fa-user-plus me-2"></i> CREATE ACCOUNT
-                    </a>
-                </div>
-            <?php endif; ?>
         </div>
     </div>
 

@@ -2116,3 +2116,18 @@ img {
     z-index: 1040;
   }
 }
+
+
+/* Mobile Nav Top Account Card */
+.mobile-nav-top-account {
+  padding: 14px 16px;
+  background: var(--color-mint-light);
+  border-bottom: 1px solid var(--color-border);
+}
+.mobile-nav-top-account .mobile-user-card {
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: #FFFFFF;
+  border: 1px solid var(--color-mint);
+  box-shadow: 0 2px 8px rgba(1, 60, 38, 0.04);
+}
