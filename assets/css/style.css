@@ -1991,10 +1991,11 @@ img {
     text-align: center !important;
   }
   .main-header-clean .brand-logo-img {
-    height: 48px !important;
-    max-height: 52px !important;
+    height: 46px !important;
+    max-height: 50px !important;
+    max-width: 200px !important;
     width: auto !important;
-    object-fit: contain;
+    object-fit: contain !important;
     transition: none !important;
   }
   .main-header-clean .header-right-actions {

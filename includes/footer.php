@@ -8,7 +8,7 @@
         <div class="container">
             <div class="row g-4">
                 <div class="col-lg-4 col-md-6">
-                    <div class="d-inline-block bg-white p-2 px-3 rounded mb-3 shadow-sm" style="max-width: 220px;">
+                    <div class="d-inline-block bg-white p-2 px-3 rounded mb-3 shadow-sm" style="max-width: 240px;">
                         <img src="<?= BASE_URL ?>assets/images/glaimagain-logo.png" alt="GLAIMAGAIN" style="height: 38px; width: auto; object-fit: contain;">
                     </div>
                     <p class="text-white-50 small pe-lg-4" style="line-height: 1.7;">

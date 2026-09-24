@@ -65,7 +65,7 @@ require_once __DIR__ . '/../includes/header.php';
                 <!-- Invoice Header -->
                 <div class="row align-items-center pb-4 mb-4 border-bottom g-3">
                     <div class="col-md-6">
-                        <img src="<?= BASE_URL ?>assets/images/glaimagain-logo.jpg" alt="GLAIMAGAIN" style="height: 52px; border-radius: 6px;" class="mb-2">
+                        <img src="<?= BASE_URL ?>assets/images/glaimagain-logo.png" alt="GLAIMAGAIN" style="height: 52px; width: auto; object-fit: contain;" class="mb-2">
                         <p class="text-muted small mb-0">GLAIMAGAIN Flagship House &bull; <?= e(getSetting('store_address', 'Mumbai, India')) ?></p>
                         <p class="text-muted small mb-0">Concierge: <?= e(getSetting('contact_phone', '+91 98765 43210')) ?> | <?= e(getSetting('contact_email', 'concierge@glaimagain.com')) ?></p>
                     </div>

@@ -58,7 +58,7 @@ require_once __DIR__ . '/includes/header.php';
             <div class="col-lg-5 col-md-7">
                 <div class="p-4 p-md-5 bg-white border border-gold-subtle rounded shadow-lg">
                     <div class="text-center mb-4">
-                        <img src="<?= BASE_URL ?>assets/images/glaimagain-logo.jpg" alt="GLAIMAGAIN" style="height: 52px; border-radius: 8px;" class="mb-2 shadow-sm">
+                        <img src="<?= BASE_URL ?>assets/images/glaimagain-logo.png" alt="GLAIMAGAIN" style="height: 52px; width: auto; object-fit: contain;" class="mb-2">
                         <h4 class="fw-bold text-emerald mt-2">CLIENT SIGN IN</h4>
                         <p class="text-muted small">Access your bespoke orders, wishlist, and saved addresses.</p>
                     </div>

@@ -19,7 +19,7 @@ $metaDescription = $metaDescription ?? getSetting('meta_description', 'GLAIMAGAI
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= e($pageTitle) ?></title>
     <meta name="description" content="<?= e($metaDescription) ?>">
-    <link rel="icon" type="image/jpeg" href="<?= BASE_URL ?>assets/images/glaimagain-logo.jpg">
+    <link rel="icon" type="image/png" href="<?= BASE_URL ?>assets/images/favicon.png">
 
     <!-- CSS Dependencies -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -57,7 +57,7 @@ $metaDescription = $metaDescription ?? getSetting('meta_description', 'GLAIMAGAI
 
                 <!-- Brand Logo (Centered on Mobile, Left on Desktop) -->
                 <a class="navbar-brand py-2 d-flex align-items-center" href="<?= BASE_URL ?>">
-                    <img src="<?= BASE_URL ?>assets/images/glaimagain-logo.jpg" alt="GLAIMAGAIN" class="brand-logo-img rounded">
+                    <img src="<?= BASE_URL ?>assets/images/glaimagain-logo.png" alt="GLAIMAGAIN" class="brand-logo-img">
                 </a>
 
                 <!-- Desktop Navigation Menu Links (Hidden on Mobile) -->
@@ -147,7 +147,7 @@ $metaDescription = $metaDescription ?? getSetting('meta_description', 'GLAIMAGAI
     <div class="mobile-nav-drawer" id="mobileNavDrawer" aria-hidden="true">
         <div class="mobile-nav-header">
             <div class="d-flex align-items-center gap-2">
-                <img src="<?= BASE_URL ?>assets/images/glaimagain-logo.jpg" alt="GLAIMAGAIN" class="mobile-drawer-logo rounded">
+                <img src="<?= BASE_URL ?>assets/images/glaimagain-logo.png" alt="GLAIMAGAIN" class="mobile-drawer-logo">
                 <span class="mobile-drawer-brand-title">GLAIMAGAIN</span>
             </div>
             <button type="button" class="mobile-nav-close-btn" id="btnMobileNavClose" aria-label="Close Menu">
