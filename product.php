@@ -321,13 +321,18 @@ require_once __DIR__ . '/includes/header.php';
                     </div>
 
                     <!-- Action Buttons -->
-                    <div class="d-flex flex-column flex-sm-row gap-3">
-                        <button type="submit" class="btn btn-luxury-primary flex-grow-1" <?= (int)$product['stock'] <= 0 ? 'disabled' : '' ?>>
-                            <i class="fas fa-shopping-bag"></i> ADD TO SHOPPING BAG
+                    <div class="d-flex flex-column gap-3 mb-3">
+                        <button type="button" class="btn btn-whatsapp-order w-100 py-3 fs-6" onclick="orderViaWhatsApp()" <?= (int)$product['stock'] <= 0 ? 'disabled' : '' ?>>
+                            <i class="fab fa-whatsapp me-2 fs-5"></i> ORDER VIA WHATSAPP
                         </button>
-                        <button type="button" class="btn btn-luxury-gold flex-grow-1" onclick="buyNowDirect()" <?= (int)$product['stock'] <= 0 ? 'disabled' : '' ?>>
-                            <i class="fas fa-bolt"></i> BUY NOW
-                        </button>
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-luxury-primary flex-grow-1 py-2" <?= (int)$product['stock'] <= 0 ? 'disabled' : '' ?>>
+                                <i class="fas fa-shopping-bag me-1"></i> ADD TO BAG
+                            </button>
+                            <a href="<?= BASE_URL ?>cart.php" class="btn btn-luxury-gold px-3 d-flex align-items-center" title="View Shopping Bag">
+                                <i class="fas fa-shopping-cart"></i>
+                            </a>
+                        </div>
                     </div>
                 </form>
 
@@ -604,13 +609,49 @@ document.querySelectorAll('.variant-btn input').forEach(radio => {
     });
 });
 
+function orderViaWhatsApp() {
+    const productName = <?= json_encode($product['name']) ?>;
+    const price = <?= (float)$product['selling_price'] ?>;
+    const productUrl = window.location.href.split('#')[0];
+    const productDesc = <?= json_encode(trim(strip_tags($product['short_description'] ?? ''))) ?>;
+    
+    // Get selected size
+    const sizeInput = document.querySelector('input[name="size"]:checked');
+    const selectedSize = sizeInput ? sizeInput.value : 'Standard';
+
+    // Get selected color
+    const colorInput = document.querySelector('input[name="color"]:checked');
+    const selectedColor = colorInput ? colorInput.value : (document.getElementById('selectedColorDisplay')?.textContent || 'Standard');
+
+    // Get quantity
+    const qtyInput = document.getElementById('productQuantity');
+    const qty = parseInt(qtyInput ? qtyInput.value : '1', 10) || 1;
+    const total = (price * qty).toLocaleString('en-IN');
+
+    let msg = "✨ *NEW ORDER INQUIRY - GLAIMAGAIN* ✨\n" +
+              "━━━━━━━━━━━━━━━━━━━━━\n" +
+              `🛍️ *Product:* ${productName}\n` +
+              `🏷️ *Price:* ₹${price.toLocaleString('en-IN')}\n` +
+              `📏 *Size:* ${selectedSize}\n` +
+              `🎨 *Color:* ${selectedColor}\n` +
+              `🔢 *Quantity:* ${qty}\n` +
+              `💰 *Total Amount:* ₹${total}\n\n`;
+
+    if (productDesc && productDesc.trim().length > 0) {
+        msg += `📝 *Details:* ${productDesc.substring(0, 140)}...\n\n`;
+    }
+
+    msg += `🔗 *Product Link:* ${productUrl}\n` +
+           "━━━━━━━━━━━━━━━━━━━━━\n" +
+           "Hello GLAIMAGAIN team, I would like to order this item. Please confirm availability and shipping details!";
+
+    const waNumber = '<?= defined("WHATSAPP_ORDER_NUMBER") ? WHATSAPP_ORDER_NUMBER : "919033321151" ?>';
+    const waUrl = `https://api.whatsapp.com/send?phone=${waNumber}&text=${encodeURIComponent(msg)}`;
+    window.open(waUrl, '_blank');
+}
+
 async function buyNowDirect() {
-    const form = document.getElementById('addToCartForm');
-    const submitBtn = form.querySelector('button[type="submit"]');
-    submitBtn.click();
-    setTimeout(() => {
-        window.location.href = "<?= BASE_URL ?>checkout.php";
-    }, 600);
+    orderViaWhatsApp();
 }
 
 // AJAX Review Form Handling (Zero page reload / redirection glitches on mobile)

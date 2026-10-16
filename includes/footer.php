@@ -17,7 +17,7 @@
                     <div class="mt-4">
                         <a href="<?= e(getSetting('instagram_url', '#')) ?>" class="footer-social-btn" title="Instagram" target="_blank" rel="noopener"><i class="fab fa-instagram"></i></a>
                         <a href="<?= e(getSetting('facebook_url', '#')) ?>" class="footer-social-btn" title="Facebook" target="_blank" rel="noopener"><i class="fab fa-facebook-f"></i></a>
-                        <a href="https://wa.me/<?= preg_replace('/[^0-9]/', '', getSetting('contact_whatsapp', '919876543210')) ?>" class="footer-social-btn" title="WhatsApp" target="_blank" rel="noopener"><i class="fab fa-whatsapp"></i></a>
+                        <a href="https://wa.me/<?= defined('WHATSAPP_ORDER_NUMBER') ? WHATSAPP_ORDER_NUMBER : '919033321151' ?>" class="footer-social-btn" title="WhatsApp Concierge" target="_blank" rel="noopener"><i class="fab fa-whatsapp"></i></a>
                     </div>
                 </div>
 
@@ -71,13 +71,19 @@
                     &copy; <?= date('Y') ?> <strong class="text-white"><?= e(getSetting('site_name', 'GLAIMAGAIN')) ?></strong>. All Rights Reserved. <?= e(getSetting('site_tagline', 'FASHION BEYOND TODAY')) ?>.
                 </div>
                 <div class="d-flex align-items-center gap-3 text-white-50 small">
-                    <span><i class="fas fa-shield-alt text-gold me-1"></i> 256-Bit SSL Encrypted Checkout</span>
+                    <span><i class="fas fa-shield-alt text-gold me-1"></i> 100% Genuine Luxury Guarantee</span>
                     <span>|</span>
-                    <span><i class="fas fa-credit-card text-gold me-1"></i> Razorpay Verified</span>
+                    <span><i class="fab fa-whatsapp text-success me-1"></i> WhatsApp Concierge Ordering</span>
                 </div>
             </div>
         </div>
     </footer>
+
+    <!-- Floating WhatsApp Concierge Widget -->
+    <a href="https://api.whatsapp.com/send?phone=<?= defined('WHATSAPP_ORDER_NUMBER') ? WHATSAPP_ORDER_NUMBER : '919033321151' ?>&text=<?= urlencode('Hello GLAIMAGAIN Concierge! I have an inquiry regarding your luxury collection.') ?>" class="floating-whatsapp-widget" target="_blank" rel="noopener" title="Chat with GLAIMAGAIN on WhatsApp">
+        <i class="fab fa-whatsapp fs-5"></i>
+        <span>Order on WhatsApp</span>
+    </a>
 
     <!-- JavaScript Dependencies -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>

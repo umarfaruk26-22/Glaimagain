@@ -184,18 +184,64 @@ require_once __DIR__ . '/includes/header.php';
                         <span class="total-price-simple"><?= formatPrice($cart['grand_total']) ?></span>
                     </div>
 
-                    <a href="<?= BASE_URL ?>checkout.php" class="btn btn-luxury-gold w-100 py-3 mt-3 <?= $cart['has_out_of_stock'] ? 'disabled' : '' ?>">
-                        <i class="fas fa-lock me-2"></i> PROCEED TO SECURE CHECKOUT
-                    </a>
+                    <button type="button" onclick="checkoutViaWhatsApp()" class="btn btn-whatsapp-order w-100 py-3 mt-3 fw-bold fs-6 shadow-sm <?= $cart['has_out_of_stock'] ? 'disabled' : '' ?>">
+                        <i class="fab fa-whatsapp me-2 fs-5"></i> ORDER ALL VIA WHATSAPP
+                    </button>
 
                     <div class="mt-4 text-center small text-muted">
-                        <div class="mb-1"><i class="fas fa-shield-alt text-gold me-1"></i> 256-Bit SSL Encrypted Razorpay Checkout</div>
-                        <div><i class="fas fa-undo text-gold me-1"></i> 7-Day Complimented Returns &amp; Exchanges</div>
+                        <div class="mb-1"><i class="fab fa-whatsapp text-success me-1"></i> Instant WhatsApp Concierge &amp; Order Confirmation</div>
+                        <div><i class="fas fa-undo text-gold me-1"></i> Custom Tailoring &amp; Fast Doorstep Delivery</div>
                     </div>
                 </div>
             </div>
         </div>
     <?php endif; ?>
 </div>
+
+<script>
+function checkoutViaWhatsApp() {
+    <?php
+    $waItems = [];
+    if (!empty($cart['items'])) {
+        foreach ($cart['items'] as $item) {
+            $waItems[] = [
+                'name' => $item['name'] ?? 'Luxury Garment',
+                'price' => (float)($item['selling_price'] ?? $item['price'] ?? 0),
+                'size' => $item['size'] ?: 'Standard',
+                'color' => $item['color'] ?: 'Default',
+                'qty' => (int)($item['quantity'] ?? 1),
+                'subtotal' => (float)($item['subtotal'] ?? 0)
+            ];
+        }
+    }
+    ?>
+    const items = <?= json_encode($waItems) ?>;
+    const grandTotal = "<?= formatPrice($cart['grand_total']) ?>";
+
+    if (!items || items.length === 0) {
+        alert("Your shopping bag is empty!");
+        return;
+    }
+
+    let msg = "✨ *NEW SHOPPING BAG ORDER - GLAIMAGAIN* ✨\n" +
+              "━━━━━━━━━━━━━━━━━━━━━\n" +
+              "🛍️ *SELECTED ITEMS:*\n\n";
+
+    items.forEach((item, index) => {
+        msg += `${index + 1}. *${item.name}*\n` +
+               `   • Size: ${item.size} | Color: ${item.color}\n` +
+               `   • Qty: ${item.qty} × ₹${item.price.toLocaleString('en-IN')} = ₹${item.subtotal.toLocaleString('en-IN')}\n\n`;
+    });
+
+    msg += "━━━━━━━━━━━━━━━━━━━━━\n" +
+           `💰 *Grand Total:* ${grandTotal}\n` +
+           "━━━━━━━━━━━━━━━━━━━━━\n" +
+           "Hello GLAIMAGAIN team, I want to order these items from my bag. Please confirm availability and delivery!";
+
+    const waNumber = '<?= defined("WHATSAPP_ORDER_NUMBER") ? WHATSAPP_ORDER_NUMBER : "919033321151" ?>';
+    const waUrl = `https://api.whatsapp.com/send?phone=${waNumber}&text=${encodeURIComponent(msg)}`;
+    window.open(waUrl, '_blank');
+}
+</script>
 
 <?php require_once __DIR__ . '/includes/footer.php'; ?>

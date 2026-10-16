@@ -65,6 +65,9 @@ define('SITE_CURRENCY', '₹');
 define('DEFAULT_SHIPPING_FEE', 99.00);
 define('FREE_SHIPPING_THRESHOLD', 1999.00);
 
+// WhatsApp Direct Concierge & Ordering
+define('WHATSAPP_ORDER_NUMBER', '919033321151');
+
 // Include Core Dependencies
 require_once CONFIG_PATH . 'database.php';
 require_once CONFIG_PATH . 'razorpay.php';

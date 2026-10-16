@@ -137,7 +137,7 @@ require_once __DIR__ . '/includes/header.php';
                     </div>
                     <div>
                         <h6 class="fw-bold text-emerald mb-1">CONCIERGE HOTLINE</h6>
-                        <p class="text-muted small mb-0"><?= e(getSetting('contact_phone', '+91 98765 43210')) ?></p>
+                        <p class="text-muted small mb-0"><?= e(getSetting('contact_phone', '+91 90333 21151')) ?></p>
                     </div>
                 </div>
 
@@ -164,7 +164,7 @@ require_once __DIR__ . '/includes/header.php';
                 <hr class="border-gold-subtle my-4">
 
                 <h6 class="fw-bold text-emerald mb-3">INSTANT WHATSAPP ASSISTANCE</h6>
-                <a href="https://wa.me/<?= preg_replace('/[^0-9]/', '', getSetting('contact_whatsapp', '919876543210')) ?>" target="_blank" rel="noopener" class="btn btn-luxury-gold w-100">
+                <a href="https://wa.me/<?= defined('WHATSAPP_ORDER_NUMBER') ? WHATSAPP_ORDER_NUMBER : '919033321151' ?>" target="_blank" rel="noopener" class="btn btn-whatsapp-order w-100">
                     <i class="fab fa-whatsapp me-2"></i> CHAT WITH CONCIERGE
                 </a>
             </div>
