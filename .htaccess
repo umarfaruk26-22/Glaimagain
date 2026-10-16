@@ -1,10 +1,10 @@
 <IfModule mod_rewrite.c>
     RewriteEngine On
-    RewriteBase /Glaimagain/
+    RewriteBase /
 
     # 1. Hide .php extension: ONLY 301-redirect GET/HEAD requests so POST form data is NEVER dropped
     RewriteCond %{REQUEST_METHOD} !^(POST|PUT|DELETE)$ [NC]
-    RewriteCond %{THE_REQUEST} ^[A-Z]{3,}\s/Glaimagain/([^\s?]+)\.php(\?[^\s]*)?\s [NC]
+    RewriteCond %{THE_REQUEST} ^[A-Z]{3,}\s/([^\s?]+)\.php(\?[^\s]*)?\s [NC]
     RewriteRule ^ %1 [R=301,L,QSA]
 
     # 2. Allow existing files, directories, assets to be served directly
