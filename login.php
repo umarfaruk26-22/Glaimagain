@@ -34,7 +34,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ($user['status'] === 'blocked') {
                 $error = 'Your account has been suspended. Please contact concierge.';
             } else {
-                loginUser($user);
+                $remember = !empty($_POST['remember_me']);
+                loginUser($user, $remember);
                 setFlashMessage('success', 'Welcome back, ' . $user['first_name'] . '.');
 
                 $redirect = $_SESSION['intended_url'] ?? (BASE_URL . 'account/profile.php');
@@ -84,7 +85,16 @@ require_once __DIR__ . '/includes/header.php';
                             <input type="password" name="password" class="form-control mt-1" placeholder="••••••••" required>
                         </div>
 
-                        <button type="submit" class="btn btn-luxury-primary w-100 py-3 mt-3">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="remember_me" id="rememberMeCheck" value="1" checked>
+                                <label class="form-check-label small text-muted user-select-none" for="rememberMeCheck">
+                                    Remember me on this device (30 Days)
+                                </label>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-luxury-primary w-100 py-3 mt-2">
                             <i class="fas fa-sign-in-alt me-2"></i> SIGN IN
                         </button>
                     </form>

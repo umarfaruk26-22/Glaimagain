@@ -85,11 +85,75 @@
         <span>Order on WhatsApp</span>
     </a>
 
+    <!-- Luxury Cookie Consent Banner -->
+    <div id="glaimCookieBanner" class="cookie-consent-bar" style="display: none;">
+        <div class="container">
+            <div class="cookie-consent-card">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="cookie-icon-wrap">
+                        <i class="fas fa-cookie-bite"></i>
+                    </div>
+                    <div class="cookie-content">
+                        <h6 class="cookie-title">We Value Your Privacy &amp; Luxury Experience</h6>
+                        <p class="cookie-text">
+                            GLAIMAGAIN uses cookies to maintain your bespoke shopping bag, keep your authentication preferences saved, and ensure an elevated shopping journey. Do you accept cookies?
+                        </p>
+                    </div>
+                </div>
+                <div class="cookie-actions">
+                    <button type="button" class="btn btn-cookie-reject" onclick="handleCookieConsent('rejected')">
+                        <i class="fas fa-times me-1"></i> Reject
+                    </button>
+                    <button type="button" class="btn btn-cookie-accept" onclick="handleCookieConsent('accepted')">
+                        <i class="fas fa-check me-1"></i> Accept Cookies
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- JavaScript Dependencies -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
     <script src="<?= BASE_URL ?>assets/js/main.js?v=<?= time() ?>"></script>
     <script src="<?= BASE_URL ?>assets/js/cart.js?v=<?= time() ?>"></script>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        function getCookie(name) {
+            const matches = document.cookie.match(new RegExp('(?:^|; )' + name.replace(/([\.$?*|{}\(\)\[\]\\\/\+^])/g, '\\$1') + '=([^;]*)'));
+            return matches ? decodeURIComponent(matches[1]) : null;
+        }
+
+        const consent = localStorage.getItem('glaimagain_cookie_consent') || getCookie('glaim_cookie_consent');
+        const banner = document.getElementById('glaimCookieBanner');
+
+        // Show banner for new visitors after slight delay
+        if (!consent && banner) {
+            setTimeout(function() {
+                banner.style.display = 'block';
+                setTimeout(function() {
+                    banner.classList.add('show');
+                }, 50);
+            }, 1000);
+        }
+    });
+
+    function handleCookieConsent(choice) {
+        const banner = document.getElementById('glaimCookieBanner');
+        if (banner) {
+            banner.classList.remove('show');
+            setTimeout(function() {
+                banner.style.display = 'none';
+            }, 400);
+        }
+
+        localStorage.setItem('glaimagain_cookie_consent', choice);
+        const maxAge = choice === 'accepted' ? (365 * 86400) : (30 * 86400);
+        document.cookie = 'glaim_cookie_consent=' + encodeURIComponent(choice) + '; max-age=' + maxAge + '; path=/; SameSite=Lax';
+    }
+    </script>
+
     <?php if (isset($extraScripts)) echo $extraScripts; ?>
 </body>
 </html>

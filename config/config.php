@@ -5,10 +5,22 @@
  */
 
 if (session_status() === PHP_SESSION_NONE) {
-    // Session security settings
-    ini_set('session.cookie_httponly', 1);
-    ini_set('session.use_only_cookies', 1);
+    // Session security & persistent lifetime settings (30 days)
+    $sessionLifetime = 30 * 86400; // 30 days
+    ini_set('session.gc_maxlifetime', (string)$sessionLifetime);
+    ini_set('session.cookie_lifetime', (string)$sessionLifetime);
+    ini_set('session.cookie_httponly', '1');
+    ini_set('session.use_only_cookies', '1');
     ini_set('session.cookie_samesite', 'Lax');
+
+    $isSecure = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || (isset($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT'] == 443);
+    session_set_cookie_params([
+        'lifetime' => $sessionLifetime,
+        'path' => '/',
+        'secure' => $isSecure,
+        'httponly' => true,
+        'samesite' => 'Lax'
+    ]);
     session_start();
 }
 

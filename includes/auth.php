@@ -5,11 +5,51 @@
 
 require_once __DIR__ . '/../config/config.php';
 
+if (!defined('AUTH_REMEMBER_SECRET')) {
+    define('AUTH_REMEMBER_SECRET', 'glaimagain_secret_patron_auth_key_2026');
+}
+
 /**
- * Check if a customer user is currently logged in
+ * Check if a customer user is currently logged in (via Session or Persistent Cookie)
  */
 function isUserLoggedIn(): bool {
-    return !empty($_SESSION['user_id']) && is_numeric($_SESSION['user_id']);
+    if (!empty($_SESSION['user_id']) && is_numeric($_SESSION['user_id'])) {
+        return true;
+    }
+
+    // Auto-restore login from persistent 30-day cookie
+    if (!empty($_COOKIE['glaim_remember_user'])) {
+        $parts = explode(':', $_COOKIE['glaim_remember_user'], 2);
+        if (count($parts) === 2) {
+            $userId = (int)$parts[0];
+            $sig = $parts[1];
+
+            if ($userId > 0) {
+                try {
+                    $pdo = getDb();
+                    $stmt = $pdo->prepare("SELECT `id`, `first_name`, `last_name`, `username`, `email`, `password`, `status` FROM `users` WHERE `id` = ? LIMIT 1");
+                    $stmt->execute([$userId]);
+                    $user = $stmt->fetch();
+
+                    if ($user && $user['status'] === 'active') {
+                        $expectedSig = hash_hmac('sha256', $user['id'] . ':' . $user['password'], AUTH_REMEMBER_SECRET);
+                        if (hash_equals($expectedSig, $sig)) {
+                            // Seamlessly restore session state
+                            $_SESSION['user_id'] = (int)$user['id'];
+                            $_SESSION['user_name'] = $user['first_name'] . ' ' . $user['last_name'];
+                            $_SESSION['user_email'] = $user['email'];
+                            $_SESSION['user_username'] = $user['username'];
+                            return true;
+                        }
+                    }
+                } catch (Exception $e) {
+                    error_log("Cookie remember auth error: " . $e->getMessage());
+                }
+            }
+        }
+    }
+
+    return false;
 }
 
 /**
@@ -61,12 +101,27 @@ function requireUserLogin(?string $redirectUrl = null): void {
 /**
  * Log in customer user and regenerate session securely
  */
-function loginUser(array $user): void {
+function loginUser(array $user, bool $remember = true): void {
     session_regenerate_id(true);
     $_SESSION['user_id'] = (int)$user['id'];
     $_SESSION['user_name'] = $user['first_name'] . ' ' . $user['last_name'];
     $_SESSION['user_email'] = $user['email'];
     $_SESSION['user_username'] = $user['username'];
+
+    // Set persistent remember cookie (30 days)
+    if ($remember) {
+        $sig = hash_hmac('sha256', $user['id'] . ':' . $user['password'], AUTH_REMEMBER_SECRET);
+        $cookieVal = $user['id'] . ':' . $sig;
+        $expire = time() + (30 * 86400); // 30 days
+        $isSecure = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || (isset($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT'] == 443);
+        setcookie('glaim_remember_user', $cookieVal, [
+            'expires' => $expire,
+            'path' => '/',
+            'secure' => $isSecure,
+            'httponly' => true,
+            'samesite' => 'Lax'
+        ]);
+    }
 
     // Transfer guest cart to user cart
     $pdo = getDb();
@@ -100,11 +155,24 @@ function loginUser(array $user): void {
 }
 
 /**
- * Log out customer user
+ * Log out customer user and clear persistent cookies
  */
 function logoutUser(): void {
     unset($_SESSION['user_id']);
     unset($_SESSION['user_name']);
     unset($_SESSION['user_email']);
     unset($_SESSION['user_username']);
+
+    // Clear persistent remember cookie
+    if (isset($_COOKIE['glaim_remember_user'])) {
+        $isSecure = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || (isset($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT'] == 443);
+        setcookie('glaim_remember_user', '', [
+            'expires' => time() - 3600,
+            'path' => '/',
+            'secure' => $isSecure,
+            'httponly' => true,
+            'samesite' => 'Lax'
+        ]);
+        unset($_COOKIE['glaim_remember_user']);
+    }
 }
