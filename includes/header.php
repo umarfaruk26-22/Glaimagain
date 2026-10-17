@@ -69,27 +69,38 @@ $metaDescription = $metaDescription ?? getSetting('meta_description', 'GLAIMAGAI
                         <li class="nav-item">
                             <a class="nav-link-modern <?= (basename($_SERVER['PHP_SELF']) == 'shop.php' && empty($_GET['category'])) ? 'active' : '' ?>" href="<?= BASE_URL ?>shop.php">SHOP</a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link-modern <?= (isset($_GET['category']) && $_GET['category'] == 'men') ? 'active' : '' ?>" href="<?= BASE_URL ?>shop.php?category=men">MEN</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link-modern <?= (isset($_GET['category']) && $_GET['category'] == 'women') ? 'active' : '' ?>" href="<?= BASE_URL ?>shop.php?category=women">WOMEN</a>
-                        </li>
-                        <li class="nav-item dropdown">
-                            <a class="nav-link-modern dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                COLLECTIONS
-                            </a>
-                            <ul class="dropdown-menu">
-                                <li><h6 class="dropdown-header">Boutique Categories</h6></li>
-                                <?php foreach ($activeCategories as $cat): ?>
-                                    <li>
-                                        <a class="dropdown-item" href="<?= BASE_URL ?>shop.php?category=<?= urlencode($cat['slug']) ?>">
-                                            <i class="fas fa-chevron-right"></i><?= e($cat['name']) ?>
-                                        </a>
-                                    </li>
-                                <?php endforeach; ?>
-                            </ul>
-                        </li>
+                        <?php if (count($activeCategories) <= 2): ?>
+                            <?php foreach ($activeCategories as $cat): ?>
+                                <li class="nav-item">
+                                    <a class="nav-link-modern <?= (isset($_GET['category']) && $_GET['category'] == $cat['slug']) ? 'active' : '' ?>" href="<?= BASE_URL ?>shop.php?category=<?= urlencode($cat['slug']) ?>">
+                                        <?= strtoupper(e($cat['name'])) ?>
+                                    </a>
+                                </li>
+                            <?php endforeach; ?>
+                        <?php else: ?>
+                            <?php foreach (array_slice($activeCategories, 0, 2) as $cat): ?>
+                                <li class="nav-item">
+                                    <a class="nav-link-modern <?= (isset($_GET['category']) && $_GET['category'] == $cat['slug']) ? 'active' : '' ?>" href="<?= BASE_URL ?>shop.php?category=<?= urlencode($cat['slug']) ?>">
+                                        <?= strtoupper(e($cat['name'])) ?>
+                                    </a>
+                                </li>
+                            <?php endforeach; ?>
+                            <li class="nav-item dropdown">
+                                <a class="nav-link-modern dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    COLLECTIONS
+                                </a>
+                                <ul class="dropdown-menu">
+                                    <li><h6 class="dropdown-header">Boutique Categories</h6></li>
+                                    <?php foreach ($activeCategories as $cat): ?>
+                                        <li>
+                                            <a class="dropdown-item" href="<?= BASE_URL ?>shop.php?category=<?= urlencode($cat['slug']) ?>">
+                                                <i class="fas fa-chevron-right"></i><?= e($cat['name']) ?>
+                                            </a>
+                                        </li>
+                                    <?php endforeach; ?>
+                                </ul>
+                            </li>
+                        <?php endif; ?>
                         <li class="nav-item">
                             <a class="nav-link-modern <?= (basename($_SERVER['PHP_SELF']) == 'about.php') ? 'active' : '' ?>" href="<?= BASE_URL ?>about.php">ABOUT</a>
                         </li>
@@ -201,31 +212,31 @@ $metaDescription = $metaDescription ?? getSetting('meta_description', 'GLAIMAGAI
                     <span>SHOP</span>
                     <i class="fas fa-chevron-right arrow-icon"></i>
                 </a>
-                <a href="<?= BASE_URL ?>shop.php?category=men" class="mobile-nav-item <?= (isset($_GET['category']) && $_GET['category'] == 'men') ? 'active' : '' ?>">
-                    <span>MEN</span>
-                    <i class="fas fa-chevron-right arrow-icon"></i>
-                </a>
-                <a href="<?= BASE_URL ?>shop.php?category=women" class="mobile-nav-item <?= (isset($_GET['category']) && $_GET['category'] == 'women') ? 'active' : '' ?>">
-                    <span>WOMEN</span>
-                    <i class="fas fa-chevron-right arrow-icon"></i>
-                </a>
-
-                <!-- COLLECTIONS Dropdown Accordion -->
-                <div class="mobile-nav-group">
-                    <button class="mobile-nav-item mobile-nav-accordion-btn" type="button" data-bs-toggle="collapse" data-bs-target="#drawerCategories" aria-expanded="false">
-                        <span>COLLECTIONS</span>
-                        <i class="fas fa-chevron-down arrow-icon"></i>
-                    </button>
-                    <div class="collapse" id="drawerCategories">
-                        <div class="mobile-subnav-list">
-                            <?php foreach ($activeCategories as $cat): ?>
-                                <a href="<?= BASE_URL ?>shop.php?category=<?= urlencode($cat['slug']) ?>" class="mobile-subnav-item">
-                                    <i class="fas fa-chevron-right me-2 text-gold" style="font-size: 10px;"></i><?= e($cat['name']) ?>
-                                </a>
-                            <?php endforeach; ?>
+                <?php if (count($activeCategories) <= 2): ?>
+                    <?php foreach ($activeCategories as $cat): ?>
+                        <a href="<?= BASE_URL ?>shop.php?category=<?= urlencode($cat['slug']) ?>" class="mobile-nav-item <?= (isset($_GET['category']) && $_GET['category'] == $cat['slug']) ? 'active' : '' ?>">
+                            <span><?= strtoupper(e($cat['name'])) ?></span>
+                            <i class="fas fa-chevron-right arrow-icon"></i>
+                        </a>
+                    <?php endforeach; ?>
+                <?php else: ?>
+                    <!-- COLLECTIONS Dropdown Accordion -->
+                    <div class="mobile-nav-group">
+                        <button class="mobile-nav-item mobile-nav-accordion-btn" type="button" data-bs-toggle="collapse" data-bs-target="#drawerCategories" aria-expanded="false">
+                            <span>COLLECTIONS</span>
+                            <i class="fas fa-chevron-down arrow-icon"></i>
+                        </button>
+                        <div class="collapse" id="drawerCategories">
+                            <div class="mobile-subnav-list">
+                                <?php foreach ($activeCategories as $cat): ?>
+                                    <a href="<?= BASE_URL ?>shop.php?category=<?= urlencode($cat['slug']) ?>" class="mobile-subnav-item">
+                                        <i class="fas fa-chevron-right me-2 text-gold" style="font-size: 10px;"></i><?= e($cat['name']) ?>
+                                    </a>
+                                <?php endforeach; ?>
+                            </div>
                         </div>
                     </div>
-                </div>
+                <?php endif; ?>
 
                 <a href="<?= BASE_URL ?>about.php" class="mobile-nav-item <?= (basename($_SERVER['PHP_SELF']) == 'about.php') ? 'active' : '' ?>">
                     <span>ABOUT</span>
@@ -258,9 +269,9 @@ $metaDescription = $metaDescription ?? getSetting('meta_description', 'GLAIMAGAI
             </form>
             <div class="mt-4 text-white-50 small">
                 <span class="text-gold me-2">Popular:</span>
-                <a href="<?= BASE_URL ?>search.php?q=Emerald" class="text-white text-decoration-underline me-3">Emerald Heavyweight Tee</a>
-                <a href="<?= BASE_URL ?>search.php?q=Velvet" class="text-white text-decoration-underline me-3">Velvet Tuxedo</a>
-                <a href="<?= BASE_URL ?>search.php?q=Denim" class="text-white text-decoration-underline">Selvedge Denim</a>
+                <a href="<?= BASE_URL ?>shop.php" class="text-white text-decoration-underline me-3">All Garments</a>
+                <a href="<?= BASE_URL ?>shop.php?sort=newest" class="text-white text-decoration-underline me-3">New Drops</a>
+                <a href="<?= BASE_URL ?>shop.php?sort=best_selling" class="text-white text-decoration-underline">Top Sellers</a>
             </div>
         </div>
     </div>

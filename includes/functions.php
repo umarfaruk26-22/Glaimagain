@@ -442,3 +442,48 @@ function sendFastApiNewsletter(string $email): bool {
     }
 }
 
+/**
+ * One-time automated store cleanup migration
+ * Resets products, reviews, and trims categories to exactly 1 on first deployment
+ */
+function runStoreCleanupMigration(): void {
+    static $executed = false;
+    if ($executed) return;
+    $executed = true;
+
+    try {
+        $pdo = getDb();
+        $stmt = $pdo->prepare("SELECT `setting_value` FROM `settings` WHERE `setting_key` = 'migration_clean_store_v1' LIMIT 1");
+        $stmt->execute();
+        $done = $stmt->fetchColumn();
+
+        if ($done !== 'completed') {
+            $pdo->exec("SET FOREIGN_KEY_CHECKS = 0;");
+            $pdo->exec("TRUNCATE TABLE `cart_items`;");
+            $pdo->exec("TRUNCATE TABLE `reviews`;");
+            $pdo->exec("UPDATE `order_items` SET `product_id` = NULL, `variant_id` = NULL;");
+            $pdo->exec("TRUNCATE TABLE `product_images`;");
+            $pdo->exec("TRUNCATE TABLE `product_variants`;");
+            $pdo->exec("TRUNCATE TABLE `products`;");
+            
+            $firstCat = $pdo->query("SELECT id FROM categories ORDER BY id ASC LIMIT 1")->fetch();
+            if ($firstCat) {
+                $firstId = (int)$firstCat['id'];
+                $pdo->exec("DELETE FROM `categories` WHERE `id` != {$firstId};");
+            }
+            
+            $pdo->exec("SET FOREIGN_KEY_CHECKS = 1;");
+
+            $saveStmt = $pdo->prepare("INSERT INTO `settings` (`setting_key`, `setting_value`, `setting_group`) 
+                VALUES ('migration_clean_store_v1', 'completed', 'system') 
+                ON DUPLICATE KEY UPDATE `setting_value` = 'completed'");
+            $saveStmt->execute();
+        }
+    } catch (\Throwable $e) {
+        error_log("Store cleanup migration error: " . $e->getMessage());
+    }
+}
+
+// Trigger migration check automatically on startup
+runStoreCleanupMigration();
+

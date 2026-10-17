@@ -7,7 +7,7 @@
     <footer class="site-footer-modern">
         <div class="container">
             <div class="row g-4">
-                <div class="col-lg-4 col-md-6">
+                <div class="col-lg-5 col-md-6">
                     <div class="d-inline-block bg-white p-2 px-3 rounded mb-3 shadow-sm" style="max-width: 240px;">
                         <img src="<?= BASE_URL ?>assets/images/glaimagain-logo.png" alt="GLAIMAGAIN" style="height: 38px; width: auto; object-fit: contain;">
                     </div>
@@ -22,20 +22,24 @@
                 </div>
 
                 <!-- Column 2: Navigation -->
-                <div class="col-lg-2 col-md-6 col-6">
+                <div class="col-lg-3 col-md-6 col-6">
                     <h5>Navigation</h5>
                     <ul>
                         <li><a href="<?= BASE_URL ?>">Home</a></li>
                         <li><a href="<?= BASE_URL ?>shop.php">All Products</a></li>
-                        <li><a href="<?= BASE_URL ?>shop.php?category=men">Men's Wardrobe</a></li>
-                        <li><a href="<?= BASE_URL ?>shop.php?category=women">Women's Atelier</a></li>
+                        <?php 
+                        $footerCats = function_exists('getActiveCategories') ? getActiveCategories() : [];
+                        foreach ($footerCats as $fc): 
+                        ?>
+                            <li><a href="<?= BASE_URL ?>shop.php?category=<?= urlencode($fc['slug']) ?>"><?= e($fc['name']) ?></a></li>
+                        <?php endforeach; ?>
                         <li><a href="<?= BASE_URL ?>about.php">About GLAIMAGAIN</a></li>
                         <li><a href="<?= BASE_URL ?>contact.php">Contact Concierge</a></li>
                     </ul>
                 </div>
 
                 <!-- Column 3: Customer Care -->
-                <div class="col-lg-2 col-md-6 col-6">
+                <div class="col-lg-4 col-md-6 col-6">
                     <h5>Client Care</h5>
                     <ul>
                         <li><a href="<?= BASE_URL ?>account/orders.php">Order Tracking</a></li>
@@ -44,24 +48,6 @@
                         <li><a href="<?= BASE_URL ?>about.php">Shipping &amp; Returns</a></li>
                         <li><a href="<?= BASE_URL ?>admin/login.php" class="text-white-50"><i class="fas fa-lock me-1"></i>Staff Access</a></li>
                     </ul>
-                </div>
-
-                <!-- Column 4: Newsletter -->
-                <div class="col-lg-4 col-md-6">
-                    <h5>Join VIP Circle</h5>
-                    <p class="text-white-50 small mb-3">
-                        Receive private invitations to limited capsule drops and bespoke seasonal releases.
-                    </p>
-                    <form action="<?= BASE_URL ?>contact.php" method="POST" class="mb-4">
-                        <?= csrfField() ?>
-                        <div class="input-group">
-                            <input type="email" name="newsletter_email" class="form-control bg-white text-dark border-0" placeholder="Enter your email address" required style="font-size: 13px; border-radius: 9999px 0 0 9999px; padding: 12px 18px;">
-                            <button class="btn btn-pill-gold" type="submit" style="border-radius: 0 9999px 9999px 0; padding: 12px 20px; font-size: 12px;">JOIN</button>
-                        </div>
-                    </form>
-                    <div class="small text-white-50">
-                        <i class="fas fa-map-marker-alt text-gold me-2"></i><?= e(getSetting('store_address', 'Mumbai, India')) ?>
-                    </div>
                 </div>
             </div>
 

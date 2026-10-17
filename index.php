@@ -96,6 +96,7 @@ require_once __DIR__ . '/includes/header.php';
     </div>
 </section>
 
+<?php if (!empty($bestSellers)): ?>
 <!-- 2. "Best Selling 🔥" Section (Dark Forest Green Container with 3s Auto-Scroll) -->
 <section class="container">
     <div class="best-selling-banner-section">
@@ -139,6 +140,7 @@ require_once __DIR__ . '/includes/header.php';
         </div>
     </div>
 </section>
+<?php endif; ?>
 
 <!-- 3. "Our Products" Catalog Section -->
 <section class="our-products-section">
@@ -161,44 +163,56 @@ require_once __DIR__ . '/includes/header.php';
 
         <!-- Product Cards Grid -->
         <div class="row g-4">
-            <?php foreach ($allProducts as $p): 
-                $discount = calculateDiscountPercent((float)$p['original_price'], (float)$p['selling_price']);
-            ?>
-                <div class="col-lg-3 col-md-4 col-6">
-                    <div class="product-card-clean">
-                        <div class="product-card-clean-img-wrap">
-                            <?php if ($discount > 0): ?>
-                                <span class="badge-discount-pill"><?= $discount ?>% OFF</span>
-                            <?php endif; ?>
-                            <a href="<?= BASE_URL ?>product.php?slug=<?= urlencode($p['slug']) ?>">
-                                <img src="<?= getProductImageUrl($p['primary_image']) ?>" alt="<?= e($p['name']) ?>" loading="lazy">
-                            </a>
-                        </div>
-                        <div class="product-card-clean-body">
-                            <h6 class="product-card-clean-title">
-                                <a href="<?= BASE_URL ?>product.php?slug=<?= urlencode($p['slug']) ?>"><?= e($p['name']) ?></a>
-                            </h6>
-                            <div class="product-card-clean-meta">
-                                <div>
-                                    <span class="product-card-clean-price"><?= formatPrice($p['selling_price']) ?></span>
-                                    <?php if ((float)$p['original_price'] > (float)$p['selling_price']): ?>
-                                        <span class="product-card-clean-original-price"><?= formatPrice($p['original_price']) ?></span>
-                                    <?php endif; ?>
+            <?php if (!empty($allProducts)): ?>
+                <?php foreach ($allProducts as $p): 
+                    $discount = calculateDiscountPercent((float)$p['original_price'], (float)$p['selling_price']);
+                ?>
+                    <div class="col-lg-3 col-md-4 col-6">
+                        <div class="product-card-clean">
+                            <div class="product-card-clean-img-wrap">
+                                <?php if ($discount > 0): ?>
+                                    <span class="badge-discount-pill"><?= $discount ?>% OFF</span>
+                                <?php endif; ?>
+                                <a href="<?= BASE_URL ?>product.php?slug=<?= urlencode($p['slug']) ?>">
+                                    <img src="<?= getProductImageUrl($p['primary_image']) ?>" alt="<?= e($p['name']) ?>" loading="lazy">
+                                </a>
+                            </div>
+                            <div class="product-card-clean-body">
+                                <h6 class="product-card-clean-title">
+                                    <a href="<?= BASE_URL ?>product.php?slug=<?= urlencode($p['slug']) ?>"><?= e($p['name']) ?></a>
+                                </h6>
+                                <div class="product-card-clean-meta">
+                                    <div>
+                                        <span class="product-card-clean-price"><?= formatPrice($p['selling_price']) ?></span>
+                                        <?php if ((float)$p['original_price'] > (float)$p['selling_price']): ?>
+                                            <span class="product-card-clean-original-price"><?= formatPrice($p['original_price']) ?></span>
+                                        <?php endif; ?>
+                                    </div>
+                                    <span class="rating-pill text-gold small">5.0 ★</span>
                                 </div>
-                                <span class="rating-pill text-gold small">5.0 ★</span>
                             </div>
                         </div>
                     </div>
+                <?php endforeach; ?>
+            <?php else: ?>
+                <div class="col-12 text-center py-5">
+                    <div class="p-5 bg-mint-light rounded-4 border border-mint">
+                        <i class="fas fa-sparkles fs-2 text-gold mb-3"></i>
+                        <h4 class="text-forest fw-bold">New Luxury Drops Coming Soon</h4>
+                        <p class="text-muted small max-w-500 mx-auto mb-0">Our bespoke garments and seasonal releases are currently being prepared. Check back shortly for our exclusive drop.</p>
+                    </div>
                 </div>
-            <?php endforeach; ?>
+            <?php endif; ?>
         </div>
 
+        <?php if (!empty($allProducts)): ?>
         <div class="text-center mt-5">
             <a href="<?= BASE_URL ?>shop.php" class="btn-pill-forest">
                 <span>EXPLORE ALL COLLECTIONS</span>
                 <i class="fas fa-arrow-right"></i>
             </a>
         </div>
+        <?php endif; ?>
     </div>
 </section>
 
