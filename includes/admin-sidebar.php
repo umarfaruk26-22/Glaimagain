@@ -83,6 +83,13 @@ $currentUri = $_SERVER['REQUEST_URI'] ?? '';
         </li>
 
         <li class="admin-nav-item">
+            <a href="<?= BASE_URL ?>admin/coupons" class="admin-nav-link <?= strpos($currentUri, '/coupons') !== false ? 'active' : '' ?>">
+                <i class="fas fa-ticket-alt"></i>
+                <span>Promo Codes / Offers</span>
+            </a>
+        </li>
+
+        <li class="admin-nav-item">
             <a href="<?= BASE_URL ?>admin/settings" class="admin-nav-link <?= strpos($currentUri, '/settings') !== false ? 'active' : '' ?>">
                 <i class="fas fa-sliders-h"></i>
                 <span>Store Settings</span>

@@ -88,7 +88,8 @@ if ($addressId === 'new') {
 
 // 2. Server-side Final Recalculations
 $subtotal = $cart['subtotal'];
-$discountAmount = $cart['discount_amount'];
+$discountAmount = $cart['discount_amount'] + ($cart['coupon_discount'] ?? 0.0);
+$couponCode = $cart['coupon_code'] ?? null;
 $shippingFee = $cart['shipping_fee'];
 $grandTotal = $cart['grand_total'];
 $amountInPaise = (int)round($grandTotal * 100);
@@ -100,12 +101,12 @@ $insOrder = $pdo->prepare("
     INSERT INTO orders (
         order_number, user_id, address_id, shipping_full_name, shipping_mobile,
         shipping_address_1, shipping_address_2, shipping_city, shipping_state, shipping_pincode,
-        subtotal, discount_amount, shipping_fee, total_amount, payment_method,
+        subtotal, discount_amount, coupon_code, shipping_fee, total_amount, payment_method,
         payment_status, order_status, notes
     ) VALUES (
         ?, ?, ?, ?, ?,
         ?, ?, ?, ?, ?,
-        ?, ?, ?, ?, 'razorpay',
+        ?, ?, ?, ?, ?, 'razorpay',
         'pending', 'pending', ?
     )
 ");
@@ -122,11 +123,16 @@ $insOrder->execute([
     $shippingPincode,
     $subtotal,
     $discountAmount,
+    $couponCode,
     $shippingFee,
     $grandTotal,
     $orderNotes
 ]);
 $internalOrderId = (int)$pdo->lastInsertId();
+
+if ($couponCode) {
+    $pdo->prepare("UPDATE `coupons` SET `used_count` = `used_count` + 1 WHERE UPPER(`code`) = UPPER(?)")->execute([$couponCode]);
+}
 
 // 4. Create Order with Razorpay REST API
 $razorpayResult = createRazorpayOrder($amountInPaise, $orderNumber, [

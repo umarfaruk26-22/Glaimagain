@@ -160,6 +160,41 @@ require_once __DIR__ . '/includes/header.php';
                         </div>
                     <?php endif; ?>
 
+                    <!-- Promo Code Box -->
+                    <div class="promo-code-card mb-3 p-3 bg-mint-light rounded-3 border border-mint">
+                        <label class="small fw-bold text-forest d-flex align-items-center justify-content-between mb-2">
+                            <span><i class="fas fa-ticket-alt text-gold me-1"></i> PROMO / COUPON CODE</span>
+                            <?php if (!empty($cart['coupon_code'])): ?>
+                                <span class="badge bg-success" style="font-size: 10px;">APPLIED</span>
+                            <?php endif; ?>
+                        </label>
+
+                        <?php if (!empty($cart['coupon_code'])): ?>
+                            <div class="d-flex align-items-center justify-content-between p-2 bg-white rounded border border-success">
+                                <div>
+                                    <strong class="text-success small letter-spacing-1"><?= e($cart['coupon_code']) ?></strong>
+                                    <span class="text-muted small ms-1">(-<?= formatPrice($cart['coupon_discount']) ?>)</span>
+                                </div>
+                                <button type="button" class="btn btn-sm btn-link text-danger p-0 text-decoration-none fw-bold" onclick="removeCoupon()">
+                                    <i class="fas fa-times-circle"></i> Remove
+                                </button>
+                            </div>
+                        <?php else: ?>
+                            <div class="input-group">
+                                <input type="text" id="couponInput" class="form-control form-control-sm text-uppercase" placeholder="Enter promo code" style="letter-spacing: 1px; font-weight: 600;">
+                                <button class="btn btn-forest btn-sm px-3" type="button" id="btnApplyCoupon" onclick="applyCoupon()">APPLY</button>
+                            </div>
+                            <div id="couponMessage" class="small mt-1" style="display:none;"></div>
+                        <?php endif; ?>
+                    </div>
+
+                    <?php if (!empty($cart['coupon_discount']) && $cart['coupon_discount'] > 0): ?>
+                        <div class="summary-row text-success">
+                            <span>Promo Discount (<?= e($cart['coupon_code']) ?>)</span>
+                            <strong>-<?= formatPrice($cart['coupon_discount']) ?></strong>
+                        </div>
+                    <?php endif; ?>
+
                     <div class="summary-row">
                         <span>Express Delivery</span>
                         <span>
@@ -199,6 +234,65 @@ require_once __DIR__ . '/includes/header.php';
 </div>
 
 <script>
+function applyCoupon() {
+    const input = document.getElementById('couponInput');
+    const msgEl = document.getElementById('couponMessage');
+    const btn = document.getElementById('btnApplyCoupon');
+    const code = input ? input.value.trim() : '';
+
+    if (!code) {
+        if (msgEl) {
+            msgEl.textContent = 'Please enter a promo code.';
+            msgEl.className = 'small mt-1 text-danger';
+            msgEl.style.display = 'block';
+        }
+        return;
+    }
+
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+
+    fetch('<?= BASE_URL ?>api/coupon/apply.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code: code })
+    })
+    .then(res => res.json())
+    .then(data => {
+        btn.disabled = false;
+        btn.textContent = 'APPLY';
+        if (data.success) {
+            location.reload();
+        } else {
+            if (msgEl) {
+                msgEl.textContent = data.message;
+                msgEl.className = 'small mt-1 text-danger';
+                msgEl.style.display = 'block';
+            }
+        }
+    })
+    .catch(() => {
+        btn.disabled = false;
+        btn.textContent = 'APPLY';
+        if (msgEl) {
+            msgEl.textContent = 'Error verifying promo code. Please try again.';
+            msgEl.className = 'small mt-1 text-danger';
+            msgEl.style.display = 'block';
+        }
+    });
+}
+
+function removeCoupon() {
+    fetch('<?= BASE_URL ?>api/coupon/remove.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+    })
+    .then(res => res.json())
+    .then(data => {
+        location.reload();
+    });
+}
+
 function checkoutViaWhatsApp() {
     <?php
     $waItems = [];
@@ -232,6 +326,10 @@ function checkoutViaWhatsApp() {
                `   • Size: ${item.size} | Color: ${item.color}\n` +
                `   • Qty: ${item.qty} × ₹${item.price.toLocaleString('en-IN')} = ₹${item.subtotal.toLocaleString('en-IN')}\n\n`;
     });
+
+    <?php if (!empty($cart['coupon_code'])): ?>
+    msg += `🎟️ *Promo Code Applied:* <?= e($cart['coupon_code']) ?> (-<?= formatPrice($cart['coupon_discount']) ?>)\n`;
+    <?php endif; ?>
 
     msg += "━━━━━━━━━━━━━━━━━━━━━\n" +
            `💰 *Grand Total:* ${grandTotal}\n` +

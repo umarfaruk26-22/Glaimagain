@@ -296,12 +296,28 @@ function getCartDetails(): array {
         ];
     }
 
+    // Calculate promo code / coupon discount if applied
+    $appliedCoupon = $_SESSION['applied_coupon'] ?? null;
+    $couponDiscount = 0.00;
+    $couponError = null;
+
+    if ($appliedCoupon && $subtotal > 0) {
+        $couponCheck = validateCoupon($appliedCoupon['code'], $subtotal);
+        if ($couponCheck['success']) {
+            $couponDiscount = $couponCheck['discount'];
+            $_SESSION['applied_coupon'] = $couponCheck['coupon']; // refresh coupon details
+        } else {
+            $couponError = $couponCheck['message'];
+        }
+    }
+
     $discountAmount = max(0.00, $totalOriginal - $subtotal);
     $freeShippingThreshold = (float)getSetting('free_shipping_threshold', (string)FREE_SHIPPING_THRESHOLD);
     $standardShippingFee = (float)getSetting('shipping_fee', (string)DEFAULT_SHIPPING_FEE);
 
-    $shippingFee = ($subtotal >= $freeShippingThreshold || $subtotal == 0) ? 0.00 : $standardShippingFee;
-    $grandTotal = $subtotal + $shippingFee;
+    $finalSubtotal = max(0.00, $subtotal - $couponDiscount);
+    $shippingFee = ($finalSubtotal >= $freeShippingThreshold || $subtotal == 0) ? 0.00 : $standardShippingFee;
+    $grandTotal = $finalSubtotal + $shippingFee;
 
     return [
         'cart_id'          => $cartId,
@@ -310,6 +326,10 @@ function getCartDetails(): array {
         'original_total'   => $totalOriginal,
         'subtotal'         => $subtotal,
         'discount_amount'  => $discountAmount,
+        'coupon_code'      => $appliedCoupon['code'] ?? null,
+        'coupon_discount'  => $couponDiscount,
+        'coupon_error'     => $couponError,
+        'coupon_details'   => $appliedCoupon,
         'shipping_fee'     => $shippingFee,
         'grand_total'      => $grandTotal,
         'has_out_of_stock' => $hasOutOfStock
@@ -486,4 +506,190 @@ function runStoreCleanupMigration(): void {
 
 // Trigger migration check automatically on startup
 runStoreCleanupMigration();
+
+/**
+ * Validate a promo code against current cart subtotal
+ */
+function validateCoupon(string $code, float $cartSubtotal = 0.0): array {
+    $code = strtoupper(trim($code));
+    if (empty($code)) {
+        return ['success' => false, 'message' => 'Please enter a promo code.'];
+    }
+
+    try {
+        $pdo = getDb();
+        $stmt = $pdo->prepare("SELECT * FROM `coupons` WHERE UPPER(`code`) = ? LIMIT 1");
+        $stmt->execute([$code]);
+        $coupon = $stmt->fetch();
+
+        if (!$coupon) {
+            return ['success' => false, 'message' => 'Invalid promo code.'];
+        }
+
+        if ($coupon['status'] !== 'active') {
+            return ['success' => false, 'message' => 'This promo code is currently inactive.'];
+        }
+
+        // Validity dates check
+        $now = date('Y-m-d H:i:s');
+        if (!empty($coupon['valid_from']) && $now < $coupon['valid_from']) {
+            return ['success' => false, 'message' => 'This promo code is not active yet.'];
+        }
+        if (!empty($coupon['valid_until']) && $now > $coupon['valid_until']) {
+            return ['success' => false, 'message' => 'This promo code has expired.'];
+        }
+
+        // Usage limit check
+        if ((int)$coupon['usage_limit'] > 0 && (int)$coupon['used_count'] >= (int)$coupon['usage_limit']) {
+            return ['success' => false, 'message' => 'This promo code usage limit has been reached.'];
+        }
+
+        // Minimum order check
+        $minOrder = (float)$coupon['min_order_amount'];
+        if ($cartSubtotal > 0 && $cartSubtotal < $minOrder) {
+            return [
+                'success' => false,
+                'message' => 'Minimum bag value of ' . formatPrice($minOrder) . ' required for this promo code.',
+                'coupon'  => $coupon
+            ];
+        }
+
+        // Calculate discount
+        $discountValue = (float)$coupon['discount_value'];
+        $discountAmount = 0.00;
+
+        if ($coupon['discount_type'] === 'percentage') {
+            $discountAmount = ($cartSubtotal * $discountValue) / 100.0;
+            if (!empty($coupon['max_discount_amount']) && (float)$coupon['max_discount_amount'] > 0) {
+                $discountAmount = min($discountAmount, (float)$coupon['max_discount_amount']);
+            }
+        } else {
+            // Fixed amount discount
+            $discountAmount = min($cartSubtotal > 0 ? $cartSubtotal : $discountValue, $discountValue);
+        }
+
+        return [
+            'success'  => true,
+            'message'  => 'Promo code applied successfully!',
+            'coupon'   => $coupon,
+            'discount' => round($discountAmount, 2)
+        ];
+    } catch (\Throwable $e) {
+        error_log("Coupon validation error: " . $e->getMessage());
+        return ['success' => false, 'message' => 'Error verifying promo code.'];
+    }
+}
+
+/**
+ * Apply promo code to user session
+ */
+function applyCouponToSession(string $code): array {
+    $cart = getCartDetails();
+    $res = validateCoupon($code, (float)$cart['subtotal']);
+    if ($res['success']) {
+        $_SESSION['applied_coupon'] = $res['coupon'];
+    }
+    return $res;
+}
+
+/**
+ * Remove promo code from user session
+ */
+function removeCouponFromSession(): void {
+    unset($_SESSION['applied_coupon']);
+}
+
+/**
+ * Automated migration for coupons table and exclusive offer homepage banner
+ */
+function runCouponAndBannerMigration(): void {
+    static $executed = false;
+    if ($executed) return;
+    $executed = true;
+
+    try {
+        $pdo = getDb();
+
+        // 1. Create coupons table
+        $pdo->exec("
+            CREATE TABLE IF NOT EXISTS `coupons` (
+              `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+              `code` VARCHAR(50) NOT NULL UNIQUE,
+              `description` VARCHAR(255) DEFAULT NULL,
+              `discount_type` ENUM('percentage', 'fixed') NOT NULL DEFAULT 'percentage',
+              `discount_value` DECIMAL(10,2) NOT NULL,
+              `min_order_amount` DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+              `max_discount_amount` DECIMAL(10,2) DEFAULT NULL,
+              `valid_from` DATETIME DEFAULT CURRENT_TIMESTAMP,
+              `valid_until` DATETIME DEFAULT NULL,
+              `usage_limit` INT UNSIGNED DEFAULT 0,
+              `used_count` INT UNSIGNED NOT NULL DEFAULT 0,
+              `status` ENUM('active', 'inactive') NOT NULL DEFAULT 'active',
+              `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+              `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+              INDEX `idx_coupon_code` (`code`),
+              INDEX `idx_coupon_status` (`status`)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+        ");
+
+        // 2. Add columns to homepage_sections if not exist
+        $cols = $pdo->query("SHOW COLUMNS FROM `homepage_sections` LIKE 'badge_text'")->fetch();
+        if (!$cols) {
+            $pdo->exec("ALTER TABLE `homepage_sections` ADD COLUMN `badge_text` VARCHAR(150) DEFAULT 'TIME-LIMITED PROMOTION' AFTER `title`");
+        }
+        $colsPromo = $pdo->query("SHOW COLUMNS FROM `homepage_sections` LIKE 'promo_code'")->fetch();
+        if (!$colsPromo) {
+            $pdo->exec("ALTER TABLE `homepage_sections` ADD COLUMN `promo_code` VARCHAR(50) DEFAULT 'GLAIM40' AFTER `button_link`");
+        }
+        $colsExp = $pdo->query("SHOW COLUMNS FROM `homepage_sections` LIKE 'expiry_date'")->fetch();
+        if (!$colsExp) {
+            $pdo->exec("ALTER TABLE `homepage_sections` ADD COLUMN `expiry_date` DATETIME DEFAULT NULL AFTER `promo_code`");
+        }
+
+        // Add coupon_code to orders table if not exist
+        $colsOrder = $pdo->query("SHOW COLUMNS FROM `orders` LIKE 'coupon_code'")->fetch();
+        if (!$colsOrder) {
+            $pdo->exec("ALTER TABLE `orders` ADD COLUMN `coupon_code` VARCHAR(50) DEFAULT NULL AFTER `discount_amount`");
+        }
+
+        // 3. Ensure exclusive_offer row exists
+        $stmt = $pdo->prepare("SELECT id FROM `homepage_sections` WHERE `section_key` = 'exclusive_offer' LIMIT 1");
+        $stmt->execute();
+        if (!$stmt->fetch()) {
+            $pdo->exec("
+                INSERT INTO `homepage_sections` 
+                (`section_key`, `title`, `badge_text`, `subtitle`, `content`, `button_text`, `button_link`, `promo_code`, `expiry_date`, `image_path`, `is_active`, `sort_order`)
+                VALUES (
+                    'exclusive_offer',
+                    'Exclusive Offer',
+                    'TIME-LIMITED PROMOTION',
+                    'Enjoy up to 40% OFF our newest luxury drops and bespoke tailoring pieces.',
+                    'Discover the key to a stylish upgrade with our exclusive deal: Enjoy up to 40% OFF our newest luxury drops and bespoke tailoring pieces.',
+                    'CLAIM EXCLUSIVE OFFER',
+                    'shop.php',
+                    'GLAIM40',
+                    DATE_ADD(NOW(), INTERVAL 7 DAY),
+                    'assets/images/exclusive-model.jpg',
+                    1,
+                    4
+                )
+            ");
+        }
+
+        // 4. Ensure default GLAIM40 coupon exists
+        $stmtC = $pdo->prepare("SELECT id FROM `coupons` WHERE `code` = 'GLAIM40' LIMIT 1");
+        $stmtC->execute();
+        if (!$stmtC->fetch()) {
+            $pdo->exec("
+                INSERT INTO `coupons` (`code`, `description`, `discount_type`, `discount_value`, `min_order_amount`, `valid_from`, `valid_until`, `usage_limit`, `status`)
+                VALUES ('GLAIM40', 'Exclusive Offer 40% OFF Luxury Garments', 'percentage', 40.00, 0.00, NOW(), DATE_ADD(NOW(), INTERVAL 30 DAY), 1000, 'active')
+            ");
+        }
+    } catch (\Throwable $e) {
+        error_log("Coupon/Banner migration error: " . $e->getMessage());
+    }
+}
+
+// Trigger Coupon and Banner Migration automatically on startup
+runCouponAndBannerMigration();
 
