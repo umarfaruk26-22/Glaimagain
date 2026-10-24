@@ -32,7 +32,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         if ($user && password_verify($password, $user['password'])) {
             if ($user['status'] === 'blocked') {
-                $error = 'Your account has been suspended. Please contact concierge.';
+                $error = 'Your account has been suspended. Please contact customer support.';
             } else {
                 $remember = !empty($_POST['remember_me']);
                 loginUser($user, $remember);

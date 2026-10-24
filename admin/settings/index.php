@@ -14,7 +14,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $settings = [
         'site_name' => trim($_POST['site_name'] ?? 'GLAIMAGAIN'),
         'site_tagline' => trim($_POST['site_tagline'] ?? 'FASHION BEYOND TODAY'),
-        'contact_email' => trim($_POST['contact_email'] ?? 'concierge@glaimagain.com'),
+        'contact_email' => trim($_POST['contact_email'] ?? 'support@glaimagain.com'),
         'contact_phone' => trim($_POST['contact_phone'] ?? '+91 98765 43210'),
         'contact_whatsapp' => trim($_POST['contact_whatsapp'] ?? '+91 98765 43210'),
         'store_address' => trim($_POST['store_address'] ?? 'GLAIMAGAIN Flagship House, Level 4, Luxury Pavilion, Mumbai, Maharashtra 400050, India'),
@@ -51,7 +51,7 @@ require_once __DIR__ . '/../../includes/admin-header.php';
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
         <h5 class="fw-bold text-emerald mb-1">Store Parameters &amp; Brand Configuration</h5>
-        <p class="text-muted small mb-0">Manage global concierge details, shipping rates, and social channels without modifying code.</p>
+        <p class="text-muted small mb-0">Manage customer support details, shipping rates, and social channels without modifying code.</p>
     </div>
 </div>
 
@@ -103,7 +103,7 @@ require_once __DIR__ . '/../../includes/admin-header.php';
                         </div>
                     </div>
                     <div class="col-12">
-                        <label class="form-label">Working / Concierge Hours</label>
+                        <label class="form-label">Working / Store Hours</label>
                         <input type="text" name="working_hours" class="form-control" value="<?= e(getSetting('working_hours', 'Mon - Sat: 10:00 AM - 08:00 PM IST')) ?>">
                     </div>
                 </div>
@@ -113,19 +113,19 @@ require_once __DIR__ . '/../../includes/admin-header.php';
         <!-- 3. Contact Channels & Flagship Address -->
         <div class="col-lg-12">
             <div class="admin-card p-4 p-md-5">
-                <h5 class="fw-bold text-emerald text-uppercase letter-spacing-1 mb-3"><i class="fas fa-address-book text-gold me-2"></i>Concierge &amp; Flagship Contact Particulars</h5>
+                <h5 class="fw-bold text-emerald text-uppercase letter-spacing-1 mb-3"><i class="fas fa-address-book text-gold me-2"></i>Customer Support &amp; Store Contact Details</h5>
                 <div class="row g-3">
                     <div class="col-md-4">
-                        <label class="form-label">Official Email <span class="text-gold">*</span></label>
-                        <input type="email" name="contact_email" class="form-control" value="<?= e(getSetting('contact_email', 'concierge@glaimagain.com')) ?>" required>
+                        <label class="form-label">Support Email <span class="text-gold">*</span></label>
+                        <input type="email" name="contact_email" class="form-control" value="<?= e(getSetting('contact_email', 'support@glaimagain.com')) ?>" required>
                     </div>
                     <div class="col-md-4">
-                        <label class="form-label">Phone Hotline <span class="text-gold">*</span></label>
-                        <input type="text" name="contact_phone" class="form-control" value="<?= e(getSetting('contact_phone', '+91 98765 43210')) ?>" required>
+                        <label class="form-label">Support Phone Hotline <span class="text-gold">*</span></label>
+                        <input type="text" name="contact_phone" class="form-control" value="<?= e(getSetting('contact_phone', '+91 90333 21151')) ?>" required>
                     </div>
                     <div class="col-md-4">
-                        <label class="form-label">WhatsApp Concierge Number <span class="text-gold">*</span></label>
-                        <input type="text" name="contact_whatsapp" class="form-control" value="<?= e(getSetting('contact_whatsapp', '+91 98765 43210')) ?>" required>
+                        <label class="form-label">WhatsApp Support Number <span class="text-gold">*</span></label>
+                        <input type="text" name="contact_whatsapp" class="form-control" value="<?= e(getSetting('contact_whatsapp', '+91 90333 21151')) ?>" required>
                     </div>
                     <div class="col-12">
                         <label class="form-label">Flagship Store &amp; Headquarters Address</label>

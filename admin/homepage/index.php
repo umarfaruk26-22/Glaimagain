@@ -198,7 +198,7 @@ require_once __DIR__ . '/../../includes/admin-header.php';
 
     <!-- 2. Brand Story CMS -->
     <div class="admin-card p-4 p-md-5 mb-4">
-        <h5 class="fw-bold text-emerald text-uppercase letter-spacing-1 mb-3"><i class="fas fa-crown text-gold me-2"></i>2. Brand Philosophy &amp; Atelier Story</h5>
+        <h5 class="fw-bold text-emerald text-uppercase letter-spacing-1 mb-3"><i class="fas fa-crown text-gold me-2"></i>2. Brand Philosophy &amp; Our Story</h5>
         <div class="row g-3">
             <div class="col-md-6">
                 <label class="form-label">Story Headline</label>

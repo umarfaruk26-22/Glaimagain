@@ -17,7 +17,7 @@
                     <div class="mt-4">
                         <a href="<?= e(getSetting('instagram_url', '#')) ?>" class="footer-social-btn" title="Instagram" target="_blank" rel="noopener"><i class="fab fa-instagram"></i></a>
                         <a href="<?= e(getSetting('facebook_url', '#')) ?>" class="footer-social-btn" title="Facebook" target="_blank" rel="noopener"><i class="fab fa-facebook-f"></i></a>
-                        <a href="https://wa.me/<?= defined('WHATSAPP_ORDER_NUMBER') ? WHATSAPP_ORDER_NUMBER : '919033321151' ?>" class="footer-social-btn" title="WhatsApp Concierge" target="_blank" rel="noopener"><i class="fab fa-whatsapp"></i></a>
+                        <a href="https://wa.me/<?= defined('WHATSAPP_ORDER_NUMBER') ? WHATSAPP_ORDER_NUMBER : '919033321151' ?>" class="footer-social-btn" title="WhatsApp Support" target="_blank" rel="noopener"><i class="fab fa-whatsapp"></i></a>
                     </div>
                 </div>
 
@@ -34,13 +34,13 @@
                             <li><a href="<?= BASE_URL ?>shop.php?category=<?= urlencode($fc['slug']) ?>"><?= e($fc['name']) ?></a></li>
                         <?php endforeach; ?>
                         <li><a href="<?= BASE_URL ?>about.php">About GLAIMAGAIN</a></li>
-                        <li><a href="<?= BASE_URL ?>contact.php">Contact Concierge</a></li>
+                        <li><a href="<?= BASE_URL ?>contact.php">Contact Us / Support</a></li>
                     </ul>
                 </div>
 
                 <!-- Column 3: Customer Care -->
                 <div class="col-lg-4 col-md-6 col-6">
-                    <h5>Client Care</h5>
+                    <h5>Customer Care</h5>
                     <ul>
                         <li><a href="<?= BASE_URL ?>account/orders.php">Order Tracking</a></li>
                         <li><a href="<?= BASE_URL ?>account/addresses.php">Shipping Addresses</a></li>
@@ -57,16 +57,16 @@
                     &copy; <?= date('Y') ?> <strong class="text-white"><?= e(getSetting('site_name', 'GLAIMAGAIN')) ?></strong>. All Rights Reserved. <?= e(getSetting('site_tagline', 'FASHION BEYOND TODAY')) ?>.
                 </div>
                 <div class="d-flex align-items-center gap-3 text-white-50 small">
-                    <span><i class="fas fa-shield-alt text-gold me-1"></i> 100% Genuine Luxury Guarantee</span>
+                    <span><i class="fas fa-shield-alt text-gold me-1"></i> 100% Genuine Quality Guarantee</span>
                     <span>|</span>
-                    <span><i class="fab fa-whatsapp text-success me-1"></i> WhatsApp Concierge Ordering</span>
+                    <span><i class="fab fa-whatsapp text-success me-1"></i> WhatsApp Order Support</span>
                 </div>
             </div>
         </div>
     </footer>
 
-    <!-- Floating WhatsApp Concierge Widget -->
-    <a href="https://api.whatsapp.com/send?phone=<?= defined('WHATSAPP_ORDER_NUMBER') ? WHATSAPP_ORDER_NUMBER : '919033321151' ?>&text=<?= urlencode('Hello GLAIMAGAIN Concierge! I have an inquiry regarding your luxury collection.') ?>" class="floating-whatsapp-widget" target="_blank" rel="noopener" title="Chat with GLAIMAGAIN on WhatsApp">
+    <!-- Floating WhatsApp Support Widget -->
+    <a href="https://api.whatsapp.com/send?phone=<?= defined('WHATSAPP_ORDER_NUMBER') ? WHATSAPP_ORDER_NUMBER : '919033321151' ?>&text=<?= urlencode('Hello GLAIMAGAIN! I have an inquiry regarding your collection.') ?>" class="floating-whatsapp-widget" target="_blank" rel="noopener" title="Chat with GLAIMAGAIN on WhatsApp">
         <i class="fab fa-whatsapp fs-5"></i>
         <span>Order on WhatsApp</span>
     </a>

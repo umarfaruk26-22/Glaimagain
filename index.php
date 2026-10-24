@@ -5,8 +5,8 @@
  */
 require_once __DIR__ . '/config/config.php';
 
-$pageTitle = 'GLAIMAGAIN | Fashion Beyond Today — Luxury Clothing & Haute Couture';
-$metaDescription = 'Explore and define your unique style with GLAIMAGAIN. Heavyweight luxury tees, tailored blazers, bespoke shirts, and Japanese denim.';
+$pageTitle = 'GLAIMAGAIN | Fashion Beyond Today — Luxury Clothing & Designer Apparel';
+$metaDescription = 'Explore and define your unique style with GLAIMAGAIN. Heavyweight luxury tees, tailored blazers, premium shirts, and Japanese denim.';
 
 $pdo = getDb();
 

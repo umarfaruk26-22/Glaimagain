@@ -4,8 +4,8 @@
  */
 require_once __DIR__ . '/config/config.php';
 
-$pageTitle = 'The Heritage & Atelier Story | GLAIMAGAIN';
-$metaDescription = 'Discover the legacy of GLAIMAGAIN — Fashion Beyond Today. Our commitment to uncompromising fabrics, bespoke tailoring, and timeless elegance.';
+$pageTitle = 'Our Story & Brand Heritage | GLAIMAGAIN';
+$metaDescription = 'Discover the story of GLAIMAGAIN — Fashion Beyond Today. Our commitment to premium fabrics, master tailoring, and timeless elegance.';
 
 require_once __DIR__ . '/includes/header.php';
 ?>
@@ -13,10 +13,10 @@ require_once __DIR__ . '/includes/header.php';
 <!-- Header Hero Banner -->
 <div class="bg-emerald text-white py-5 border-bottom border-gold-subtle">
     <div class="container text-center py-4">
-        <span class="text-gold fw-bold letter-spacing-4 small text-uppercase">The Atelier</span>
+        <span class="text-gold fw-bold letter-spacing-4 small text-uppercase">Our Story</span>
         <h1 class="display-4 fw-bold text-white mt-1">FASHION BEYOND TODAY</h1>
         <div class="gold-divider"><i class="fas fa-crown"></i></div>
-        <p class="lead text-white-50 max-w-600 mx-auto">Where haute couture tailoring intersects with visionary modern luxury.</p>
+        <p class="lead text-white-50 max-w-600 mx-auto">Where master tailoring meets visionary modern fashion.</p>
     </div>
 </div>
 
@@ -31,7 +31,7 @@ require_once __DIR__ . '/includes/header.php';
                 GLAIMAGAIN was established upon a singular philosophy: that clothing should not merely reflect fleeting micro-trends, but command timeless authority.
             </p>
             <p class="text-muted" style="line-height: 1.8;">
-                From our custom-milled 280+ GSM combed organic cottons to hand-tailored silk velvet tuxedo lapels, every garment is an architectural masterpiece designed for patrons who demand unmatched sartorial elegance.
+                From our custom-milled 280+ GSM combed organic cottons to hand-tailored silk velvet tuxedo lapels, every garment is crafted for those who appreciate premium quality and comfort.
             </p>
         </div>
         <div class="col-lg-6">
@@ -44,7 +44,7 @@ require_once __DIR__ . '/includes/header.php';
         <div class="col-md-4">
             <div class="p-3">
                 <i class="fas fa-feather-alt text-gold fs-1 mb-3"></i>
-                <h4 class="text-emerald fw-bold">BESPOKE MATERIALS</h4>
+                <h4 class="text-emerald fw-bold">PREMIUM MATERIALS</h4>
                 <p class="text-muted small mb-0">We curate 120s Egyptian Giza cottons, raw Japanese selvedge denim, and genuine mother-of-pearl buttons.</p>
             </div>
         </div>

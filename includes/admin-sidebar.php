@@ -64,14 +64,14 @@ $currentUri = $_SERVER['REQUEST_URI'] ?? '';
         <li class="admin-nav-item">
             <a href="<?= BASE_URL ?>admin/reviews" class="admin-nav-link <?= strpos($currentUri, '/reviews') !== false ? 'active' : '' ?>">
                 <i class="fas fa-star"></i>
-                <span>Client Reviews</span>
+                <span>Customer Reviews</span>
             </a>
         </li>
 
         <li class="admin-nav-item">
             <a href="<?= BASE_URL ?>admin/enquiries" class="admin-nav-link <?= strpos($currentUri, '/enquiries') !== false ? 'active' : '' ?>">
                 <i class="fas fa-envelope-open-text"></i>
-                <span>Concierge Inbox</span>
+                <span>Customer Inquiries</span>
             </a>
         </li>
 

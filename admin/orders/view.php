@@ -147,8 +147,8 @@ require_once __DIR__ . '/../../includes/admin-header.php';
                     <select name="order_status" class="form-select">
                         <option value="pending" <?= $order['order_status'] === 'pending' ? 'selected' : '' ?>>Pending</option>
                         <option value="confirmed" <?= $order['order_status'] === 'confirmed' ? 'selected' : '' ?>>Confirmed</option>
-                        <option value="processing" <?= $order['order_status'] === 'processing' ? 'selected' : '' ?>>Processing / Atelier Tailoring</option>
-                        <option value="packed" <?= $order['order_status'] === 'packed' ? 'selected' : '' ?>>Packed in Keepsake Box</option>
+                        <option value="processing" <?= $order['order_status'] === 'processing' ? 'selected' : '' ?>>Processing / Preparing Order</option>
+                        <option value="packed" <?= $order['order_status'] === 'packed' ? 'selected' : '' ?>>Packed &amp; Ready for Dispatch</option>
                         <option value="shipped" <?= $order['order_status'] === 'shipped' ? 'selected' : '' ?>>Shipped / Out for Delivery</option>
                         <option value="delivered" <?= $order['order_status'] === 'delivered' ? 'selected' : '' ?>>Delivered</option>
                         <option value="cancelled" <?= $order['order_status'] === 'cancelled' ? 'selected' : '' ?>>Cancelled</option>

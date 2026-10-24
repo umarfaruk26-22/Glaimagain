@@ -747,11 +747,11 @@ function runCarouselMigration(): void {
                 'active'
             ]);
 
-            // Slide 2: Haute Couture emerald & gold coats
+            // Slide 2: Emerald & Gold Tailored Outerwear
             $stmt->execute([
-                'Bespoke Tailoring & Haute Outerwear',
+                'Tailored Jackets & Premium Outerwear',
                 'TIMELESS LUXURY APPAREL',
-                'Handcrafted silhouettes in deep emerald velvet and intricate bullion embroidery. Designed for discerning tastemakers.',
+                'Handcrafted in deep emerald velvet and intricate gold embroidery. Designed for an elegant, modern silhouette.',
                 'EXPLORE COLLECTION',
                 'shop.php',
                 'assets/images/carousel-slide-2.jpg',
@@ -777,11 +777,11 @@ function runCarouselMigration(): void {
                 'active'
             ]);
 
-            // Slide 4: Autumn/Winter Haute Drop
+            // Slide 4: Autumn/Winter Collection
             $stmt->execute([
-                'Autumn / Winter 2026 Haute Drop',
+                'Autumn / Winter 2026 Collection',
                 'NEW ARRIVALS 2026',
-                'Discover statement outerwear, 120s Egyptian cotton shirts, and Japanese selvedge denim cut to sovereign perfection.',
+                'Discover statement jackets, 120s Egyptian cotton shirts, and Japanese selvedge denim cut to perfection.',
                 'SHOP NEW ARRIVALS',
                 'shop.php?sort=newest',
                 'assets/images/hero-banner.jpg',
@@ -792,12 +792,18 @@ function runCarouselMigration(): void {
                 'active'
             ]);
         } else {
-            // Ensure any existing slides have their dedicated mobile images populated
+            // Ensure any existing slides have their dedicated mobile images populated and modern titles
             $pdo->exec("UPDATE `carousel_slides` SET `mobile_image_path` = 'assets/images/carousel-slide-1-mobile.jpg' WHERE `id` = 1 AND (`mobile_image_path` IS NULL OR `mobile_image_path` = '')");
-            $pdo->exec("UPDATE `carousel_slides` SET `mobile_image_path` = 'assets/images/carousel-slide-2-mobile.jpg' WHERE `id` = 2 AND (`mobile_image_path` IS NULL OR `mobile_image_path` = '')");
+            $pdo->exec("UPDATE `carousel_slides` SET `mobile_image_path` = 'assets/images/carousel-slide-2-mobile.jpg', `title` = 'Tailored Jackets & Premium Outerwear', `description` = 'Handcrafted in deep emerald velvet and intricate gold embroidery. Designed for an elegant, modern silhouette.' WHERE `id` = 2");
             $pdo->exec("UPDATE `carousel_slides` SET `mobile_image_path` = 'assets/images/carousel-slide-3-mobile.jpg' WHERE `id` = 3 AND (`mobile_image_path` IS NULL OR `mobile_image_path` = '')");
-            $pdo->exec("UPDATE `carousel_slides` SET `mobile_image_path` = 'assets/images/carousel-slide-4-mobile.jpg' WHERE `id` = 4 AND (`mobile_image_path` IS NULL OR `mobile_image_path` = '')");
+            $pdo->exec("UPDATE `carousel_slides` SET `mobile_image_path` = 'assets/images/carousel-slide-4-mobile.jpg', `title` = 'Autumn / Winter 2026 Collection', `description` = 'Discover statement jackets, 120s Egyptian cotton shirts, and Japanese selvedge denim cut to perfection.' WHERE `id` = 4");
         }
+
+        // Global normalization of fancy terms to normal customer-friendly terms
+        $pdo->exec("UPDATE `settings` SET `setting_value` = 'support@glaimagain.com' WHERE `setting_key` = 'contact_email' AND (`setting_value` LIKE '%concierge%' OR `setting_value` = '')");
+        $pdo->exec("UPDATE `reviews` SET `comment` = REPLACE(`comment`, 'haute couture luxury', 'premium designer luxury')");
+        $pdo->exec("UPDATE `reviews` SET `title` = 'Exquisite craftsmanship and perfect fit' WHERE `title` LIKE '%bespoke fit%'");
+        $pdo->exec("UPDATE `homepage_sections` SET `content` = REPLACE(`content`, 'haute couture precision', 'master tailoring and precision') WHERE `section_key` = 'brand_story'");
     } catch (\Throwable $e) {
         error_log('Carousel migration error: ' . $e->getMessage());
     }
@@ -1041,8 +1047,8 @@ function ensureSampleStoreData(): void {
                 $productId,
                 $userId,
                 5,
-                'Exquisite craftsmanship and bespoke fit',
-                'The fabric weight, precision stitching, and rich emerald/gold finish are exceptional. Truly feels like haute couture luxury.'
+                'Exquisite craftsmanship and perfect fit',
+                'The fabric weight, precision stitching, and rich emerald/gold finish are exceptional. Truly feels like premium designer luxury.'
             ]);
         }
     } catch (\Throwable $e) {

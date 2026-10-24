@@ -153,10 +153,10 @@ require_once __DIR__ . '/includes/header.php';
                         </div>
                     </div>
 
-                    <!-- Bespoke Tailoring & Concierge Notes -->
+                    <!-- Order Notes & Special Instructions -->
                     <div class="mb-3">
-                        <label class="form-label small fw-bold text-emerald text-uppercase letter-spacing-1">Order / Bespoke Packaging Notes (Optional)</label>
-                        <textarea id="order_notes" rows="2" class="form-control" placeholder="Special delivery instructions, gift wrapping note, etc."></textarea>
+                        <label class="form-label small fw-bold text-emerald text-uppercase letter-spacing-1">Order / Delivery Notes (Optional)</label>
+                        <textarea id="order_notes" rows="2" class="form-control" placeholder="Special delivery instructions, landmark, etc."></textarea>
                     </div>
                 </form>
             </div>
@@ -165,7 +165,7 @@ require_once __DIR__ . '/includes/header.php';
         <!-- 2. Right Column: Live Calculated Summary & Razorpay Trigger -->
         <div class="col-lg-5 checkout-summary-card-mobile">
             <div class="p-4 p-md-5 bg-white border border-gold-subtle rounded shadow-sm sticky-top" style="top: 100px;">
-                <h5 class="cart-summary-title">2. COMMISSION SUMMARY</h5>
+                <h5 class="cart-summary-title">2. ORDER SUMMARY</h5>
 
                 <!-- Items list snapshot -->
                 <div class="checkout-items-list mb-4 pb-3 border-bottom">

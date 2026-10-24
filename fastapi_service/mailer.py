@@ -177,19 +177,19 @@ def generate_luxury_html_email(
     <!-- Header -->
     <div class="email-header">
       <h1 class="brand-title">GLAIMAGAIN</h1>
-      <div class="brand-subtitle">Fashion Beyond Today &bull; Private Atelier</div>
-      <div class="badge-inquiry">&#10022; NEW CLIENT INQUIRY RECEIVED &#10022;</div>
+      <div class="brand-subtitle">Fashion Beyond Today &bull; Customer Support</div>
+      <div class="badge-inquiry">&#10022; NEW CUSTOMER MESSAGE RECEIVED &#10022;</div>
     </div>
 
     <!-- Body -->
     <div class="email-body">
       <p class="intro-text">
-        A new inquiry has been transmitted through the <strong>GLAIMAGAIN Concierge Portal</strong>. Below are the full customer submission details:
+        A new inquiry has been received through the <strong>GLAIMAGAIN Contact Page</strong>. Below are the full customer submission details:
       </p>
 
       <table class="info-table">
         <tr>
-          <td>Client Name</td>
+          <td>Customer Name</td>
           <td><strong>{name}</strong></td>
         </tr>
         <tr>
@@ -205,26 +205,26 @@ def generate_luxury_html_email(
           <td><strong style="color: #B99036;">{subject}</strong></td>
         </tr>
         <tr>
-          <td>Transmission Time</td>
+          <td>Received Time</td>
           <td>{timestamp_str} (IST)</td>
         </tr>
       </table>
 
-      <div class="message-label">Transmitted Client Message:</div>
+      <div class="message-label">Customer Message:</div>
       <div class="message-box">
         <p class="message-content">{message}</p>
       </div>
 
       <div style="text-align: center; margin-top: 30px;">
-        <a href="mailto:{email}?subject=Re:%20{subject}%20-%20GLAIMAGAIN%20Concierge" class="action-btn">
-          &rarr; Reply Directly To Client
+        <a href="mailto:{email}?subject=Re:%20{subject}%20-%20GLAIMAGAIN%20Support" class="action-btn">
+          &rarr; Reply Directly To Customer
         </a>
       </div>
     </div>
 
     <!-- Footer -->
     <div class="email-footer">
-      <p class="footer-text">This automated notification was dispatched via the <span class="footer-highlight">GLAIMAGAIN FastAPI Concierge Microservice</span>.</p>
+      <p class="footer-text">This automated notification was dispatched via the <span class="footer-highlight">GLAIMAGAIN Mailer Service</span>.</p>
       <p class="footer-text">&copy; 2026 GLAIMAGAIN &bull; All Rights Reserved.</p>
     </div>
   </div>

@@ -30,15 +30,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 $stmt = $pdo->query("SELECT * FROM contact_messages ORDER BY is_read ASC, id DESC");
 $enquiries = $stmt->fetchAll();
 
-$adminHeaderHeading = 'Concierge Inbox';
-$adminTitle = 'Concierge Inbox | GLAIMAGAIN Admin';
+$adminHeaderHeading = 'Customer Inquiries';
+$adminTitle = 'Customer Inquiries | GLAIMAGAIN Admin';
 require_once __DIR__ . '/../../includes/admin-header.php';
 ?>
 
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
-        <h5 class="fw-bold text-emerald mb-1">Client Inquiries &amp; Correspondences (<?= count($enquiries) ?>)</h5>
-        <p class="text-muted small mb-0">Manage concierge requests, bespoke fitting consultations, and VIP inquiries.</p>
+        <h5 class="fw-bold text-emerald mb-1">Customer Inquiries &amp; Messages (<?= count($enquiries) ?>)</h5>
+        <p class="text-muted small mb-0">Manage customer inquiries, order questions, and contact messages.</p>
     </div>
 </div>
 

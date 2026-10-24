@@ -224,8 +224,8 @@ require_once __DIR__ . '/includes/header.php';
                     </button>
 
                     <div class="mt-4 text-center small text-muted">
-                        <div class="mb-1"><i class="fab fa-whatsapp text-success me-1"></i> Instant WhatsApp Concierge &amp; Order Confirmation</div>
-                        <div><i class="fas fa-undo text-gold me-1"></i> Custom Tailoring &amp; Fast Doorstep Delivery</div>
+                        <div class="mb-1"><i class="fab fa-whatsapp text-success me-1"></i> Instant WhatsApp Support &amp; Order Confirmation</div>
+                        <div><i class="fas fa-undo text-gold me-1"></i> Fast Doorstep Delivery &amp; Easy Returns</div>
                     </div>
                 </div>
             </div>
