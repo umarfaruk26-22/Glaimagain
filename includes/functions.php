@@ -776,6 +776,21 @@ function runCarouselMigration(): void {
                 3,
                 'active'
             ]);
+
+            // Slide 4: Autumn/Winter Haute Drop
+            $stmt->execute([
+                'Autumn / Winter 2026 Haute Drop',
+                'NEW ARRIVALS 2026',
+                'Discover statement outerwear, 120s Egyptian cotton shirts, and Japanese selvedge denim cut to sovereign perfection.',
+                'SHOP NEW ARRIVALS',
+                'shop.php?sort=newest',
+                'assets/images/hero-banner.jpg',
+                null,
+                'left',
+                'light',
+                4,
+                'active'
+            ]);
         }
     } catch (\Throwable $e) {
         error_log('Carousel migration error: ' . $e->getMessage());
@@ -784,6 +799,253 @@ function runCarouselMigration(): void {
 
 // Trigger Carousel Migration automatically on startup
 runCarouselMigration();
+
+/**
+ * Automatically ensure sample categories, products, images, variants, and reviews are populated
+ */
+function ensureSampleStoreData(): void {
+    static $executed = false;
+    if ($executed) return;
+    $executed = true;
+
+    try {
+        $pdo = getDb();
+        $prodCount = (int)$pdo->query("SELECT COUNT(*) FROM `products`")->fetchColumn();
+        if ($prodCount > 0) {
+            return;
+        }
+
+        // 1. Seed / ensure categories
+        $categories = [
+            ['name' => 'Men', 'slug' => 'men', 'description' => 'Sophisticated, tailored menswear designed for modern elegance.', 'image' => 'assets/images/category-men.jpg', 'is_featured' => 1, 'sort_order' => 1],
+            ['name' => 'Tailored Jackets', 'slug' => 'tailored-jackets', 'description' => 'Structured blazers, emerald overcoats, and statement outerwear.', 'image' => 'assets/images/category-jackets.jpg', 'is_featured' => 1, 'sort_order' => 2],
+            ['name' => 'Luxury T-Shirts', 'slug' => 'luxury-t-shirts', 'description' => 'Heavyweight 280 GSM combed cotton oversized and signature t-shirts.', 'image' => 'assets/images/category-tshirts.jpg', 'is_featured' => 1, 'sort_order' => 3],
+            ['name' => 'Premium Shirts', 'slug' => 'premium-shirts', 'description' => 'Egyptian cotton bespoke dress shirts and luxury linen resort shirts.', 'image' => 'assets/images/category-shirts.jpg', 'is_featured' => 1, 'sort_order' => 4],
+            ['name' => 'Designer Hoodies', 'slug' => 'designer-hoodies', 'description' => 'Ultra-soft fleece oversized luxury streetwear hoodies with gold embroidery.', 'image' => 'assets/images/category-hoodies.jpg', 'is_featured' => 1, 'sort_order' => 5],
+            ['name' => 'Jeans & Trousers', 'slug' => 'jeans-trousers', 'description' => 'Selvedge denim and pleated trousers with impeccable drape.', 'image' => 'assets/images/category-jeans.jpg', 'is_featured' => 1, 'sort_order' => 6],
+            ['name' => 'Luxury Accessories', 'slug' => 'accessories', 'description' => 'Artisan leather goods, signature scarves, and gold-finish cufflinks.', 'image' => 'assets/images/category-accessories.jpg', 'is_featured' => 1, 'sort_order' => 7]
+        ];
+
+        $catStmt = $pdo->prepare("
+            INSERT INTO `categories` (`name`, `slug`, `description`, `image`, `status`, `is_featured`, `sort_order`)
+            VALUES (?, ?, ?, ?, 'active', ?, ?)
+            ON DUPLICATE KEY UPDATE `name` = VALUES(`name`), `description` = VALUES(`description`), `image` = VALUES(`image`), `status` = 'active', `is_featured` = VALUES(`is_featured`), `sort_order` = VALUES(`sort_order`)
+        ");
+        foreach ($categories as $cat) {
+            $catStmt->execute([$cat['name'], $cat['slug'], $cat['description'], $cat['image'], $cat['is_featured'], $cat['sort_order']]);
+        }
+
+        // Build slug -> id map
+        $catMap = [];
+        $allCats = $pdo->query("SELECT id, slug FROM categories")->fetchAll();
+        foreach ($allCats as $c) {
+            $catMap[$c['slug']] = (int)$c['id'];
+        }
+
+        // 2. Seed 6 Flagship luxury products (1 per category)
+        $products = [
+            [
+                'category_slug' => 'tailored-jackets',
+                'name' => 'Monogram Gold Crest Velvet Tuxedo Blazer',
+                'slug' => 'monogram-gold-crest-velvet-tuxedo-blazer',
+                'sku' => 'GLA-JKT-001',
+                'short_description' => 'Deep emerald silk-blend velvet blazer accented with handcrafted gold bullion embroidery.',
+                'detailed_description' => '<p>Command any evening in this statement tuxedo blazer. Cut from plush silk-cotton velvet in our signature deep emerald hue, featuring a shawl lapel lined with satin and antique gold crest hand-embroidery on the pocket.</p><ul><li>Silk-Cotton Micro-Velvet exterior with duchess satin lapels</li><li>Cupro luxury gold monogram jacquard lining</li><li>Tailored slim silhouette with double back vents</li><li>Dry clean only</li></ul>',
+                'original_price' => 14999.00,
+                'selling_price' => 8999.00,
+                'stock' => 20,
+                'sizes' => '38,40,42,44',
+                'colors' => 'Emerald Green,Obsidian Black',
+                'is_featured' => 1,
+                'is_new_arrival' => 1,
+                'is_best_seller' => 1,
+                'images' => [
+                    'assets/images/product-jacket-velvet-1.jpg',
+                    'assets/images/product-jacket-velvet-2.jpg'
+                ]
+            ],
+            [
+                'category_slug' => 'luxury-t-shirts',
+                'name' => 'Signature Emerald Oversized Heavyweight Tee',
+                'slug' => 'signature-emerald-oversized-heavyweight-tee',
+                'sku' => 'GLA-TSH-002',
+                'short_description' => 'Crafted from 280 GSM luxury combed cotton with signature gold silicone branding.',
+                'detailed_description' => '<p>Redefine casual luxury with the GLAIMAGAIN Signature Emerald Oversized Tee. Cut from custom-milled 280 GSM organic combed cotton, this heavyweight t-shirt features a relaxed boxy drape, reinforced ribbed collar, and high-density gold micro-embroidery across the chest.</p><ul><li>100% Combed Compact Organic Cotton (280 GSM)</li><li>Pre-shrunk and silicone-washed for extreme softness</li><li>Embossed metallic gold logo accent on nape and chest</li><li>Handcrafted in limited batches</li></ul>',
+                'original_price' => 2999.00,
+                'selling_price' => 1799.00,
+                'stock' => 50,
+                'sizes' => 'S,M,L,XL,XXL',
+                'colors' => 'Emerald Green,Midnight Black,Ivory White',
+                'is_featured' => 1,
+                'is_new_arrival' => 1,
+                'is_best_seller' => 1,
+                'images' => [
+                    'assets/images/product-tshirt-emerald-1.jpg',
+                    'assets/images/product-tshirt-emerald-2.jpg',
+                    'assets/images/product-tshirt-emerald-3.jpg'
+                ]
+            ],
+            [
+                'category_slug' => 'premium-shirts',
+                'name' => 'Royal Oxford French Cuff Dress Shirt',
+                'slug' => 'royal-oxford-french-cuff-dress-shirt',
+                'sku' => 'GLA-SHT-003',
+                'short_description' => 'Two-ply Egyptian Giza cotton tailored dress shirt with mother-of-pearl buttons.',
+                'detailed_description' => '<p>The quintessential luxury dress shirt. Woven from superfine two-ply 120s Egyptian Giza cotton, this shirt offers an exquisite lustrous finish and structured cutaway collar. Completed with genuine Australian mother-of-pearl buttons and convertible French cuffs.</p><ul><li>100% Egyptian Giza Cotton (120s Two-Ply)</li><li>Hand-sewn mother-of-pearl buttons</li><li>Stiffened collar stays included</li><li>Wrinkle-resistant luxury weave</li></ul>',
+                'original_price' => 4999.00,
+                'selling_price' => 3299.00,
+                'stock' => 35,
+                'sizes' => '38,40,42,44,46',
+                'colors' => 'Crisp White,Midnight Navy,Champagne Gold',
+                'is_featured' => 1,
+                'is_new_arrival' => 1,
+                'is_best_seller' => 1,
+                'images' => [
+                    'assets/images/product-shirt-white-1.jpg',
+                    'assets/images/product-shirt-white-2.jpg'
+                ]
+            ],
+            [
+                'category_slug' => 'designer-hoodies',
+                'name' => 'Heritage 450 GSM French Terry Gold Crest Hoodie',
+                'slug' => 'heritage-450-gsm-french-terry-gold-crest-hoodie',
+                'sku' => 'GLA-HDY-004',
+                'short_description' => 'Super-heavy 450 GSM unbrushed loopback cotton hoodie with engraved gold aglets.',
+                'detailed_description' => '<p>Engineered for unmatched comfort and architectural drape. Built with bespoke 450 GSM Japanese loopback French terry, custom heavyweight dual-layer hood, and 24K gold-plated drawstring aglets.</p><ul><li>450 GSM 100% Loopback French Terry Cotton</li><li>24K antique gold electroplated drawstring aglets</li><li>Hidden side seam kangaroo pockets</li><li>Preshrunk double-ribbed side gussets</li></ul>',
+                'original_price' => 5499.00,
+                'selling_price' => 3499.00,
+                'stock' => 40,
+                'sizes' => 'S,M,L,XL,XXL',
+                'colors' => 'Deep Emerald,Midnight Black,Desert Sand',
+                'is_featured' => 1,
+                'is_new_arrival' => 0,
+                'is_best_seller' => 1,
+                'images' => [
+                    'assets/images/product-hoodie-emerald-1.jpg',
+                    'assets/images/product-hoodie-emerald-2.jpg'
+                ]
+            ],
+            [
+                'category_slug' => 'jeans-trousers',
+                'name' => 'Selvedge Raw Indigo Tapered Denim',
+                'slug' => 'selvedge-raw-indigo-tapered-denim',
+                'sku' => 'GLA-JNS-005',
+                'short_description' => '14.5 oz Kurabo Japanese raw shuttle-loom selvedge denim with gold selvedge ID line.',
+                'detailed_description' => '<p>Woven on antique shuttle looms in Okayama, Japan, using 100% long-staple cotton dipped 16 times in natural indigo. Features our exclusive gold thread selvedge ticker along the outseam.</p><ul><li>14.5 oz Japanese Raw Indigo Selvedge Denim</li><li>Gold-line selvedge ticker</li><li>Solid brass custom stamped doughnut buttons</li><li>Embossed saddle leather back patch</li></ul>',
+                'original_price' => 6999.00,
+                'selling_price' => 4499.00,
+                'stock' => 30,
+                'sizes' => '30,32,34,36,38',
+                'colors' => 'Raw Indigo,Washed Obsidian',
+                'is_featured' => 1,
+                'is_new_arrival' => 1,
+                'is_best_seller' => 1,
+                'images' => [
+                    'assets/images/product-jeans-indigo-1.jpg',
+                    'assets/images/product-jeans-indigo-2.jpg'
+                ]
+            ],
+            [
+                'category_slug' => 'accessories',
+                'name' => 'Handcrafted Full-Grain Leather Gold Buckle Belt',
+                'slug' => 'handcrafted-full-grain-leather-gold-buckle-belt',
+                'sku' => 'GLA-ACC-006',
+                'short_description' => 'Italian vegetable-tanned bridle leather belt with solid brass gold-polished buckle.',
+                'detailed_description' => '<p>Hand-cut and burnished by master leather artisans. Crafted from premium 4mm Tuscan vegetable-tanned full-grain leather that patinas beautifully with age. Finished with a heavy brass buckle dipped in 24K gold lacquer.</p><ul><li>Full-grain Tuscan vegetable-tanned leather</li><li>Solid forged brass buckle with mirror gold finish</li><li>Beveled and hand-waxed edges</li><li>Presented in luxury emerald velvet dust bag</li></ul>',
+                'original_price' => 3499.00,
+                'selling_price' => 2199.00,
+                'stock' => 45,
+                'sizes' => '32,34,36,38,40',
+                'colors' => 'Onyx Black,Cognac Brown,Emerald Green',
+                'is_featured' => 1,
+                'is_new_arrival' => 0,
+                'is_best_seller' => 1,
+                'images' => [
+                    'assets/images/product-belt-black-1.jpg',
+                    'assets/images/product-belt-black-2.jpg'
+                ]
+            ]
+        ];
+
+        $prodStmt = $pdo->prepare("
+            INSERT INTO `products` (
+                `category_id`, `name`, `slug`, `sku`, `short_description`, `detailed_description`,
+                `original_price`, `selling_price`, `stock`, `sizes`, `colors`, `status`,
+                `is_featured`, `is_new_arrival`, `is_best_seller`
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'active', ?, ?, ?)
+        ");
+
+        $imgStmt = $pdo->prepare("
+            INSERT INTO `product_images` (`product_id`, `image_path`, `is_primary`, `sort_order`)
+            VALUES (?, ?, ?, ?)
+        ");
+
+        $varStmt = $pdo->prepare("
+            INSERT INTO `product_variants` (`product_id`, `size`, `color`, `sku`, `stock`, `additional_price`, `status`)
+            VALUES (?, ?, ?, ?, ?, 0.00, 'active')
+        ");
+
+        $reviewStmt = $pdo->prepare("
+            INSERT INTO `reviews` (`product_id`, `user_id`, `rating`, `title`, `comment`, `status`)
+            VALUES (?, ?, ?, ?, ?, 'approved')
+        ");
+
+        $firstUser = $pdo->query("SELECT id FROM users ORDER BY id ASC LIMIT 1")->fetch();
+        $userId = $firstUser ? (int)$firstUser['id'] : 1;
+
+        foreach ($products as $p) {
+            $catId = $catMap[$p['category_slug']] ?? 1;
+            $prodStmt->execute([
+                $catId,
+                $p['name'],
+                $p['slug'],
+                $p['sku'],
+                $p['short_description'],
+                $p['detailed_description'],
+                $p['original_price'],
+                $p['selling_price'],
+                $p['stock'],
+                $p['sizes'],
+                $p['colors'],
+                $p['is_featured'],
+                $p['is_new_arrival'],
+                $p['is_best_seller']
+            ]);
+            $productId = $pdo->lastInsertId();
+
+            // Images
+            foreach ($p['images'] as $idx => $img) {
+                $imgStmt->execute([$productId, $img, ($idx === 0 ? 1 : 0), $idx]);
+            }
+
+            // Variants
+            $sizeList = explode(',', $p['sizes']);
+            $colorList = explode(',', $p['colors']);
+            foreach ($sizeList as $s) {
+                $s = trim($s);
+                foreach ($colorList as $c) {
+                    $c = trim($c);
+                    $varSku = $p['sku'] . '-' . strtoupper(substr($s, 0, 3)) . '-' . strtoupper(substr(preg_replace('/[^a-zA-Z]/', '', $c), 0, 3));
+                    $varStmt->execute([$productId, $s, $c, $varSku, 10]);
+                }
+            }
+
+            // Sample Review
+            $reviewStmt->execute([
+                $productId,
+                $userId,
+                5,
+                'Exquisite craftsmanship and bespoke fit',
+                'The fabric weight, precision stitching, and rich emerald/gold finish are exceptional. Truly feels like haute couture luxury.'
+            ]);
+        }
+    } catch (\Throwable $e) {
+        error_log('ensureSampleStoreData error: ' . $e->getMessage());
+    }
+}
+
+// Trigger Sample Store Data seeder automatically
+ensureSampleStoreData();
 
 /**
  * Fetch all carousel slides
@@ -808,4 +1070,5 @@ function getCarouselSlide(int $id): ?array {
     $slide = $stmt->fetch();
     return $slide ?: null;
 }
+
 
