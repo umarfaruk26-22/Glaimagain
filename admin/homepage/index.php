@@ -140,12 +140,33 @@ require_once __DIR__ . '/../../includes/admin-header.php';
     </a>
 </div>
 
+<!-- Top Hero Carousel Slides Callout -->
+<div class="admin-card p-4 p-md-5 mb-4 border border-2" style="border-color: #013C26 !important; background: linear-gradient(135deg, #013C26 0%, #081F15 100%); color: #FFFFFF; border-radius: 12px; box-shadow: 0 10px 30px rgba(1, 60, 38, 0.15);">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+        <div>
+            <span class="badge bg-gold text-dark px-3 py-1 rounded-pill small mb-2 fw-bold"><i class="fas fa-sparkles me-1"></i> FLAGSHIP HERO CAROUSEL</span>
+            <h4 class="fw-bold text-white mb-2"><i class="fas fa-images text-gold me-2"></i>Multi-Slide Hero Carousel &amp; Mobile Banners</h4>
+            <p class="text-white-50 mb-0 small" style="max-width: 650px;">
+                The homepage hero section is powered by an interactive multi-slide Carousel with smooth touch swiping on mobile. Add, edit, or remove photos, headlines, custom mobile crops, and button actions.
+            </p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="<?= BASE_URL ?>admin/carousel/index.php" class="btn btn-warning fw-bold text-dark px-4 py-2 shadow-sm">
+                <i class="fas fa-images me-2"></i> Open Carousel Manager
+            </a>
+            <a href="<?= BASE_URL ?>admin/carousel/add.php" class="btn btn-outline-light px-3 py-2">
+                <i class="fas fa-plus me-1"></i> Add Slide
+            </a>
+        </div>
+    </div>
+</div>
+
 <form method="POST" action="<?= BASE_URL ?>admin/homepage/index.php" enctype="multipart/form-data" class="form-luxury">
     <?= csrfField() ?>
 
-    <!-- 1. Hero Banner CMS -->
+    <!-- 1. Fallback Hero Section Copy -->
     <div class="admin-card p-4 p-md-5 mb-4">
-        <h5 class="fw-bold text-emerald text-uppercase letter-spacing-1 mb-3"><i class="fas fa-image text-gold me-2"></i>1. Hero Banner &amp; Headline Section</h5>
+        <h5 class="fw-bold text-emerald text-uppercase letter-spacing-1 mb-3"><i class="fas fa-image text-gold me-2"></i>1. Brand Tagline &amp; Meta Headline</h5>
         <div class="row g-3">
             <div class="col-md-6">
                 <label class="form-label">Headline Title</label>

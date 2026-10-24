@@ -693,3 +693,119 @@ function runCouponAndBannerMigration(): void {
 // Trigger Coupon and Banner Migration automatically on startup
 runCouponAndBannerMigration();
 
+/**
+ * Automated migration for hero carousel slides table and initial default slides
+ */
+function runCarouselMigration(): void {
+    static $executed = false;
+    if ($executed) return;
+    $executed = true;
+
+    try {
+        $pdo = getDb();
+        $pdo->exec("
+            CREATE TABLE IF NOT EXISTS `carousel_slides` (
+              `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+              `title` VARCHAR(255) DEFAULT NULL,
+              `subtitle` VARCHAR(255) DEFAULT NULL,
+              `description` TEXT DEFAULT NULL,
+              `button_text` VARCHAR(100) DEFAULT 'START SHOPPING',
+              `button_link` VARCHAR(255) DEFAULT 'shop.php',
+              `image_path` VARCHAR(255) NOT NULL,
+              `mobile_image_path` VARCHAR(255) DEFAULT NULL,
+              `text_position` ENUM('left', 'center', 'right') NOT NULL DEFAULT 'left',
+              `text_color` ENUM('light', 'dark') NOT NULL DEFAULT 'light',
+              `sort_order` INT NOT NULL DEFAULT 0,
+              `status` ENUM('active', 'inactive') NOT NULL DEFAULT 'active',
+              `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+              `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+              INDEX `idx_carousel_status_sort` (`status`, `sort_order`)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+        ");
+
+        // Seed initial slides if table is empty
+        $count = (int)$pdo->query("SELECT COUNT(*) FROM `carousel_slides`")->fetchColumn();
+        if ($count === 0) {
+            $stmt = $pdo->prepare("
+                INSERT INTO `carousel_slides` 
+                (`title`, `subtitle`, `description`, `button_text`, `button_link`, `image_path`, `mobile_image_path`, `text_position`, `text_color`, `sort_order`, `status`)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ");
+
+            // Slide 1: The user's exact Autograph collection requested
+            $stmt->execute([
+                'Explore and Define Your Unique Style!',
+                'AUTOGRAPH COLLECTION 2026',
+                'Browse our thoughtfully curated assortment of fashionable attire and bespoke silhouettes, designed to match your individual presence.',
+                'START SHOPPING',
+                'shop.php',
+                'assets/images/carousel-slide-1.jpg',
+                'assets/images/carousel-slide-1-mobile.jpg',
+                'left',
+                'light',
+                1,
+                'active'
+            ]);
+
+            // Slide 2: Haute Couture emerald & gold coats
+            $stmt->execute([
+                'Bespoke Tailoring & Haute Outerwear',
+                'TIMELESS LUXURY APPAREL',
+                'Handcrafted silhouettes in deep emerald velvet and intricate bullion embroidery. Designed for discerning tastemakers.',
+                'EXPLORE COLLECTION',
+                'shop.php',
+                'assets/images/carousel-slide-2.jpg',
+                null,
+                'left',
+                'light',
+                2,
+                'active'
+            ]);
+
+            // Slide 3: Limited Edition Capsule
+            $stmt->execute([
+                'The Emerald & Gold Capsule',
+                'LIMITED EDITION 2026',
+                'Experience 280 GSM heavyweight combed cottons, bespoke Italian cuts, and pure 24K gold accents.',
+                'SHOP THE CAPSULE',
+                'shop.php',
+                'assets/images/promo-capsule.jpg',
+                null,
+                'left',
+                'light',
+                3,
+                'active'
+            ]);
+        }
+    } catch (\Throwable $e) {
+        error_log('Carousel migration error: ' . $e->getMessage());
+    }
+}
+
+// Trigger Carousel Migration automatically on startup
+runCarouselMigration();
+
+/**
+ * Fetch all carousel slides
+ */
+function getCarouselSlides(bool $onlyActive = true): array {
+    $pdo = getDb();
+    if ($onlyActive) {
+        $stmt = $pdo->query("SELECT * FROM `carousel_slides` WHERE `status` = 'active' ORDER BY `sort_order` ASC, `id` ASC");
+    } else {
+        $stmt = $pdo->query("SELECT * FROM `carousel_slides` ORDER BY `sort_order` ASC, `id` ASC");
+    }
+    return $stmt->fetchAll();
+}
+
+/**
+ * Fetch a single carousel slide by ID
+ */
+function getCarouselSlide(int $id): ?array {
+    $pdo = getDb();
+    $stmt = $pdo->prepare("SELECT * FROM `carousel_slides` WHERE `id` = ? LIMIT 1");
+    $stmt->execute([$id]);
+    $slide = $stmt->fetch();
+    return $slide ?: null;
+}
+

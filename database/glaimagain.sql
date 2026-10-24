@@ -299,14 +299,38 @@ CREATE TABLE `homepage_sections` (
   `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   `section_key` VARCHAR(100) NOT NULL UNIQUE,
   `title` VARCHAR(200) NOT NULL,
+  `badge_text` VARCHAR(150) DEFAULT 'TIME-LIMITED PROMOTION',
   `subtitle` VARCHAR(300) DEFAULT NULL,
   `content` TEXT DEFAULT NULL,
   `button_text` VARCHAR(100) DEFAULT NULL,
   `button_link` VARCHAR(255) DEFAULT NULL,
+  `promo_code` VARCHAR(50) DEFAULT 'GLAIM40',
+  `expiry_date` DATETIME DEFAULT NULL,
   `image_path` VARCHAR(255) DEFAULT NULL,
   `is_active` TINYINT(1) NOT NULL DEFAULT 1,
   `sort_order` INT NOT NULL DEFAULT 0,
   `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- 17. Hero Carousel Slides Table
+DROP TABLE IF EXISTS `carousel_slides`;
+CREATE TABLE `carousel_slides` (
+  `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  `title` VARCHAR(255) DEFAULT NULL,
+  `subtitle` VARCHAR(255) DEFAULT NULL,
+  `description` TEXT DEFAULT NULL,
+  `button_text` VARCHAR(100) DEFAULT 'START SHOPPING',
+  `button_link` VARCHAR(255) DEFAULT 'shop.php',
+  `image_path` VARCHAR(255) NOT NULL,
+  `mobile_image_path` VARCHAR(255) DEFAULT NULL,
+  `text_position` ENUM('left', 'center', 'right') NOT NULL DEFAULT 'left',
+  `text_color` ENUM('light', 'dark') NOT NULL DEFAULT 'light',
+  `sort_order` INT NOT NULL DEFAULT 0,
+  `status` ENUM('active', 'inactive') NOT NULL DEFAULT 'active',
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  INDEX `idx_carousel_status_sort` (`status`, `sort_order`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 SET FOREIGN_KEY_CHECKS = 1;
+

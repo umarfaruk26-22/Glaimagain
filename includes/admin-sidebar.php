@@ -76,8 +76,15 @@ $currentUri = $_SERVER['REQUEST_URI'] ?? '';
         </li>
 
         <li class="admin-nav-item">
+            <a href="<?= BASE_URL ?>admin/carousel" class="admin-nav-link <?= strpos($currentUri, '/carousel') !== false ? 'active' : '' ?>">
+                <i class="fas fa-images"></i>
+                <span>Hero Carousel</span>
+            </a>
+        </li>
+
+        <li class="admin-nav-item">
             <a href="<?= BASE_URL ?>admin/homepage" class="admin-nav-link <?= strpos($currentUri, '/homepage') !== false ? 'active' : '' ?>">
-                <i class="fas fa-image"></i>
+                <i class="fas fa-sliders-h"></i>
                 <span>Homepage CMS</span>
             </a>
         </li>

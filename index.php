@@ -46,6 +46,9 @@ $reviewsStmt = $pdo->query("
 ");
 $clientReviews = $reviewsStmt->fetchAll();
 
+// Fetch Carousel Slides (Active & ordered)
+$carouselSlides = getCarouselSlides(true);
+
 // Fetch Exclusive Offer Section (CMS)
 $exOfferStmt = $pdo->prepare("SELECT * FROM homepage_sections WHERE section_key = 'exclusive_offer' LIMIT 1");
 $exOfferStmt->execute();
@@ -54,52 +57,98 @@ $exclusiveOffer = $exOfferStmt->fetch();
 require_once __DIR__ . '/includes/header.php';
 ?>
 
-<!-- 1. Hero Section (Rozelio Split Style) -->
-<section class="hero-rozelio-section">
-    <div class="container">
-        <div class="row align-items-center g-5">
-            <!-- Left Hero Content -->
-            <div class="col-lg-6">
-                <span class="badge bg-mint text-forest fw-bold px-3 py-2 rounded-pill small mb-3 letter-spacing-1">
-                    <i class="fas fa-sparkles me-1 text-gold"></i> AUTOGRAPH COLLECTION 2026
-                </span>
-                <h1 class="hero-rozelio-title">
-                    Explore and<br>Define Your<br>Unique Style!
-                </h1>
-                <p class="hero-rozelio-subtitle">
-                    Browse our thoughtfully curated assortment of fashionable attire and bespoke silhouettes, designed to match your individual presence.
-                </p>
-                <div class="d-flex flex-wrap gap-3 align-items-center">
-                    <a href="<?= BASE_URL ?>shop.php" class="btn-pill-forest">
-                        <span>START SHOPPING</span>
-                        <i class="fas fa-arrow-right"></i>
-                    </a>
-                    
+<!-- 1. Hero Dynamic Carousel Section (Responsive Luxury Swiper) -->
+<?php if (!empty($carouselSlides)): ?>
+<section class="hero-carousel-section">
+    <div class="swiper heroSwiper">
+        <div class="swiper-wrapper">
+            <?php foreach ($carouselSlides as $slideIndex => $slide): ?>
+                <?php
+                $hasBtn = !empty($slide['button_text']) && !empty($slide['button_link']);
+                $alignClass = 'text-start align-items-start';
+                $justifyCol = 'justify-content-start';
+                if (($slide['text_position'] ?? 'left') === 'center') {
+                    $alignClass = 'text-center align-items-center mx-auto';
+                    $justifyCol = 'justify-content-center';
+                } elseif (($slide['text_position'] ?? 'left') === 'right') {
+                    $alignClass = 'text-end align-items-end ms-auto';
+                    $justifyCol = 'justify-content-end';
+                }
+                $isDarkText = ($slide['text_color'] ?? 'light') === 'dark';
+                ?>
+                <div class="swiper-slide hero-carousel-slide <?= $isDarkText ? 'slide-theme-dark' : 'slide-theme-light' ?>">
+                    <!-- Background Picture (Responsive Desktop & Mobile Sources) -->
+                    <div class="hero-slide-bg-wrap">
+                        <picture>
+                            <?php if (!empty($slide['mobile_image_path'])): ?>
+                                <source media="(max-width: 767.98px)" srcset="<?= BASE_URL . e($slide['mobile_image_path']) ?>">
+                            <?php endif; ?>
+                            <img src="<?= BASE_URL . e($slide['image_path']) ?>" 
+                                 alt="<?= e($slide['title'] ?? 'GLAIMAGAIN Luxury Style') ?>" 
+                                 class="hero-slide-bg-img"
+                                 loading="<?= $slideIndex === 0 ? 'eager' : 'lazy' ?>"
+                                 <?= $slideIndex === 0 ? 'fetchpriority="high"' : '' ?>>
+                        </picture>
+                        <!-- Dynamic Gradient Overlay for Ultimate Text Legibility -->
+                        <div class="hero-slide-overlay <?= 'overlay-' . ($slide['text_position'] ?? 'left') ?>"></div>
+                    </div>
+
+                    <!-- Slide Content Layer -->
+                    <div class="container hero-slide-content-wrap">
+                        <div class="row align-items-center <?= $justifyCol ?>">
+                            <div class="col-xl-7 col-lg-8 col-md-10 col-12">
+                                <div class="hero-slide-content d-flex flex-column <?= $alignClass ?>">
+                                    <?php if (!empty($slide['subtitle'])): ?>
+                                        <span class="hero-slide-badge mb-2 mb-md-3">
+                                            <i class="fas fa-sparkles text-gold me-1"></i> <?= e($slide['subtitle']) ?>
+                                        </span>
+                                    <?php endif; ?>
+
+                                    <?php if (!empty($slide['title'])): ?>
+                                        <h1 class="hero-slide-title mb-2 mb-md-3">
+                                            <?= nl2br(e($slide['title'])) ?>
+                                        </h1>
+                                    <?php endif; ?>
+
+                                    <?php if (!empty($slide['description'])): ?>
+                                        <p class="hero-slide-desc mb-3 mb-md-4">
+                                            <?= e($slide['description']) ?>
+                                        </p>
+                                    <?php endif; ?>
+
+                                    <?php if ($hasBtn): ?>
+                                        <div class="hero-slide-actions mt-1">
+                                            <a href="<?= BASE_URL . e($slide['button_link']) ?>" class="btn-hero-cta">
+                                                <span><?= e($slide['button_text']) ?></span>
+                                                <i class="fas fa-arrow-right"></i>
+                                            </a>
+                                        </div>
+                                    <?php elseif (!empty($slide['button_link'])): ?>
+                                        <a href="<?= BASE_URL . e($slide['button_link']) ?>" class="stretched-link" aria-label="Explore Banner"></a>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-            </div>
-
-            <!-- Right Hero Model Card with Decorative Dot Matrices -->
-            <div class="col-lg-6 text-center">
-                <div class="hero-model-card-wrap">
-                    <!-- Top Right Dot Matrix -->
-                    <div class="dot-matrix dot-matrix-top-right">
-                        <?php for ($i = 0; $i < 25; $i++): ?><span></span><?php endfor; ?>
-                    </div>
-
-                    <!-- Bottom Left Dot Matrix -->
-                    <div class="dot-matrix dot-matrix-bottom-left">
-                        <?php for ($i = 0; $i < 25; $i++): ?><span></span><?php endfor; ?>
-                    </div>
-
-                    <!-- Main Rounded Model Portrait -->
-                    <div class="hero-model-card">
-                        <img src="<?= BASE_URL ?>assets/images/hero-model.jpg" alt="GLAIMAGAIN Style Model">
-                    </div>
-                </div>
-            </div>
+            <?php endforeach; ?>
         </div>
+
+        <?php if (count($carouselSlides) > 1): ?>
+            <!-- Swiper Luxury Arrows -->
+            <button type="button" class="hero-swiper-btn hero-swiper-prev" aria-label="Previous Slide">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            <button type="button" class="hero-swiper-btn hero-swiper-next" aria-label="Next Slide">
+                <i class="fas fa-chevron-right"></i>
+            </button>
+
+            <!-- Swiper Pagination Indicators -->
+            <div class="hero-swiper-pagination"></div>
+        <?php endif; ?>
     </div>
 </section>
+<?php endif; ?>
 
 <?php if (!empty($bestSellers)): ?>
 <!-- 2. "Best Selling 🔥" Section (Dark Forest Green Container with 3s Auto-Scroll) -->
