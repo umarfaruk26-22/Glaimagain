@@ -755,7 +755,7 @@ function runCarouselMigration(): void {
                 'EXPLORE COLLECTION',
                 'shop.php',
                 'assets/images/carousel-slide-2.jpg',
-                null,
+                'assets/images/carousel-slide-2-mobile.jpg',
                 'left',
                 'light',
                 2,
@@ -770,7 +770,7 @@ function runCarouselMigration(): void {
                 'SHOP THE CAPSULE',
                 'shop.php',
                 'assets/images/promo-capsule.jpg',
-                null,
+                'assets/images/carousel-slide-3-mobile.jpg',
                 'left',
                 'light',
                 3,
@@ -785,12 +785,18 @@ function runCarouselMigration(): void {
                 'SHOP NEW ARRIVALS',
                 'shop.php?sort=newest',
                 'assets/images/hero-banner.jpg',
-                null,
+                'assets/images/carousel-slide-4-mobile.jpg',
                 'left',
                 'light',
                 4,
                 'active'
             ]);
+        } else {
+            // Ensure any existing slides have their dedicated mobile images populated
+            $pdo->exec("UPDATE `carousel_slides` SET `mobile_image_path` = 'assets/images/carousel-slide-1-mobile.jpg' WHERE `id` = 1 AND (`mobile_image_path` IS NULL OR `mobile_image_path` = '')");
+            $pdo->exec("UPDATE `carousel_slides` SET `mobile_image_path` = 'assets/images/carousel-slide-2-mobile.jpg' WHERE `id` = 2 AND (`mobile_image_path` IS NULL OR `mobile_image_path` = '')");
+            $pdo->exec("UPDATE `carousel_slides` SET `mobile_image_path` = 'assets/images/carousel-slide-3-mobile.jpg' WHERE `id` = 3 AND (`mobile_image_path` IS NULL OR `mobile_image_path` = '')");
+            $pdo->exec("UPDATE `carousel_slides` SET `mobile_image_path` = 'assets/images/carousel-slide-4-mobile.jpg' WHERE `id` = 4 AND (`mobile_image_path` IS NULL OR `mobile_image_path` = '')");
         }
     } catch (\Throwable $e) {
         error_log('Carousel migration error: ' . $e->getMessage());

@@ -156,6 +156,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 bestSellersTrack.scrollBy({ left: getScrollStep(), behavior: 'smooth' });
             });
         }
+    }
+
     // 6. Luxury Hero Carousel (Swiper 11 with Mobile Touch & Swipe Support)
     const heroSwiperEl = document.querySelector('.heroSwiper');
     if (heroSwiperEl && typeof Swiper !== 'undefined') {
