@@ -238,6 +238,43 @@ require_once __DIR__ . '/../../includes/admin-header.php';
                 </div>
             </div>
 
+            <!-- 4. Live Real-Time Banner & Text Overlay Preview -->
+            <div class="admin-card p-4 p-md-5 mb-4">
+                <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+                    <h5 class="fw-bold text-emerald text-uppercase letter-spacing-1 mb-0">
+                        <i class="fas fa-eye text-gold me-2"></i>4. Live Slide Text Overlay Preview
+                    </h5>
+                    <span class="badge bg-mint text-forest px-3 py-1 rounded-pill small">
+                        <i class="fas fa-sync-alt fa-spin me-1 text-gold"></i> Live Real-Time Preview
+                    </span>
+                </div>
+                <p class="text-muted small mb-3">
+                    As you type headlines, change alignment, or choose images above, watch this preview render exactly how it will appear to visitors on the live storefront:
+                </p>
+
+                <div class="position-relative rounded overflow-hidden shadow-lg" id="liveSlideBox" style="min-height: 290px; background: #012819 url('<?= BASE_URL ?>assets/images/hero-banner.jpg') center/cover no-repeat; transition: all 0.3s ease;">
+                    <div id="liveOverlay" style="position: absolute; inset: 0; background: linear-gradient(90deg, rgba(1, 38, 24, 0.94) 0%, rgba(1, 38, 24, 0.6) 45%, rgba(1, 38, 24, 0.15) 100%); pointer-events: none;"></div>
+                    <div class="position-relative h-100 p-4 p-md-5 d-flex flex-column justify-content-center" id="liveContentWrap" style="z-index: 2; min-height: 290px;">
+                        <div id="liveBadgeWrap" class="mb-2">
+                            <span class="badge" id="liveBadge" style="background: rgba(1, 38, 24, 0.85); color: #D4AF37; border: 1px solid rgba(212, 175, 55, 0.6); font-size: 11px; letter-spacing: 1.5px; padding: 6px 14px; text-transform: uppercase;">
+                                <i class="fas fa-sparkles me-1 text-gold"></i> <span id="liveBadgeText">AUTOGRAPH COLLECTION 2026</span>
+                            </span>
+                        </div>
+                        <h2 id="liveTitle" style="font-family: 'Playfair Display', Georgia, serif; color: #FFFFFF; font-size: clamp(1.4rem, 3.2vw, 2.1rem); line-height: 1.2; font-weight: 700; margin-bottom: 12px; max-width: 620px;">
+                            Explore and Define Your Unique Style!
+                        </h2>
+                        <p id="liveDesc" style="color: rgba(255, 255, 255, 0.82); font-size: 0.92rem; line-height: 1.5; margin-bottom: 18px; max-width: 540px;">
+                            Browse our thoughtfully curated assortment of fashionable attire and bespoke silhouettes.
+                        </p>
+                        <div id="liveBtnWrap">
+                            <span class="btn btn-sm text-uppercase fw-bold" style="background: #D4AF37; color: #012819; padding: 9px 24px; border-radius: 50px; letter-spacing: 1px; font-size: 11.5px; display: inline-flex; align-items: center; gap: 8px;">
+                                <span id="liveBtnText">START SHOPPING</span> <i class="fas fa-arrow-right"></i>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Action Buttons -->
             <div class="d-flex justify-content-end gap-3 mb-5">
                 <a href="<?= BASE_URL ?>admin/carousel/index.php" class="btn btn-outline-secondary px-4">Cancel</a>
@@ -250,36 +287,136 @@ require_once __DIR__ . '/../../includes/admin-header.php';
 </div>
 
 <script>
-// Image preview scripts
-document.getElementById('desktopImageInput')?.addEventListener('change', function(e) {
+// Live Preview Elements
+const desktopInput = document.getElementById('desktopImageInput');
+const mobileInput = document.getElementById('mobileImageInput');
+const liveSlideBox = document.getElementById('liveSlideBox');
+const liveOverlay = document.getElementById('liveOverlay');
+const liveContentWrap = document.getElementById('liveContentWrap');
+
+const subtitleInput = document.querySelector('input[name="subtitle"]');
+const titleInput = document.querySelector('input[name="title"]');
+const descInput = document.querySelector('textarea[name="description"]');
+const btnTextInput = document.querySelector('input[name="button_text"]');
+const textPosSelect = document.querySelector('select[name="text_position"]');
+const textColorSelect = document.querySelector('select[name="text_color"]');
+
+const liveBadgeWrap = document.getElementById('liveBadgeWrap');
+const liveBadgeText = document.getElementById('liveBadgeText');
+const liveTitle = document.getElementById('liveTitle');
+const liveDesc = document.getElementById('liveDesc');
+const liveBtnWrap = document.getElementById('liveBtnWrap');
+const liveBtnText = document.getElementById('liveBtnText');
+
+function updateLivePreview() {
+    // Badge / Subtitle
+    const subVal = subtitleInput ? subtitleInput.value.trim() : '';
+    if (subVal) {
+        liveBadgeWrap.style.display = 'block';
+        liveBadgeText.textContent = subVal;
+    } else {
+        liveBadgeWrap.style.display = 'none';
+    }
+
+    // Title
+    const titleVal = titleInput ? titleInput.value.trim() : '';
+    if (titleVal) {
+        liveTitle.style.display = 'block';
+        liveTitle.textContent = titleVal;
+    } else {
+        liveTitle.style.display = 'none';
+    }
+
+    // Description
+    const descVal = descInput ? descInput.value.trim() : '';
+    if (descVal) {
+        liveDesc.style.display = 'block';
+        liveDesc.textContent = descVal;
+    } else {
+        liveDesc.style.display = 'none';
+    }
+
+    // Button
+    const btnVal = btnTextInput ? btnTextInput.value.trim() : '';
+    if (btnVal) {
+        liveBtnWrap.style.display = 'block';
+        liveBtnText.textContent = btnVal;
+    } else {
+        liveBtnWrap.style.display = 'none';
+    }
+
+    // Text Position
+    const pos = textPosSelect ? textPosSelect.value : 'left';
+    if (pos === 'center') {
+        liveContentWrap.className = 'position-relative h-100 p-4 p-md-5 d-flex flex-column justify-content-center text-center align-items-center mx-auto';
+        liveOverlay.style.background = 'linear-gradient(180deg, rgba(1, 38, 24, 0.2) 0%, rgba(1, 38, 24, 0.72) 45%, rgba(1, 38, 24, 0.94) 100%)';
+    } else if (pos === 'right') {
+        liveContentWrap.className = 'position-relative h-100 p-4 p-md-5 d-flex flex-column justify-content-center text-end align-items-end ms-auto';
+        liveOverlay.style.background = 'linear-gradient(270deg, rgba(1, 38, 24, 0.94) 0%, rgba(1, 38, 24, 0.6) 45%, rgba(1, 38, 24, 0.15) 100%)';
+    } else {
+        liveContentWrap.className = 'position-relative h-100 p-4 p-md-5 d-flex flex-column justify-content-center text-start align-items-start';
+        liveOverlay.style.background = 'linear-gradient(90deg, rgba(1, 38, 24, 0.94) 0%, rgba(1, 38, 24, 0.6) 45%, rgba(1, 38, 24, 0.15) 100%)';
+    }
+
+    // Text Color
+    const col = textColorSelect ? textColorSelect.value : 'light';
+    if (col === 'dark') {
+        liveTitle.style.color = '#012819';
+        liveDesc.style.color = '#1A3F30';
+        liveOverlay.style.background = 'linear-gradient(90deg, rgba(255, 255, 255, 0.92) 0%, rgba(255, 255, 255, 0.6) 45%, rgba(255, 255, 255, 0.15) 100%)';
+    } else {
+        liveTitle.style.color = '#FFFFFF';
+        liveDesc.style.color = 'rgba(255, 255, 255, 0.82)';
+    }
+}
+
+// Attach event listeners
+[subtitleInput, titleInput, descInput, btnTextInput].forEach(el => {
+    if (el) el.addEventListener('input', updateLivePreview);
+});
+[textPosSelect, textColorSelect].forEach(el => {
+    if (el) el.addEventListener('change', updateLivePreview);
+});
+
+// Image file readers
+desktopInput?.addEventListener('change', function(e) {
     const file = e.target.files[0];
     if (file) {
         const reader = new FileReader();
         reader.onload = function(evt) {
             const img = document.getElementById('desktopPreviewImg');
             const placeholder = document.getElementById('desktopPreviewPlaceholder');
-            img.src = evt.target.result;
-            img.classList.remove('d-none');
-            placeholder.classList.add('d-none');
+            if (img && placeholder) {
+                img.src = evt.target.result;
+                img.classList.remove('d-none');
+                placeholder.classList.add('d-none');
+            }
+            if (liveSlideBox) {
+                liveSlideBox.style.backgroundImage = 'url(' + evt.target.result + ')';
+            }
         };
         reader.readAsDataURL(file);
     }
 });
 
-document.getElementById('mobileImageInput')?.addEventListener('change', function(e) {
+mobileInput?.addEventListener('change', function(e) {
     const file = e.target.files[0];
     if (file) {
         const reader = new FileReader();
         reader.onload = function(evt) {
             const img = document.getElementById('mobilePreviewImg');
             const placeholder = document.getElementById('mobilePreviewPlaceholder');
-            img.src = evt.target.result;
-            img.classList.remove('d-none');
-            placeholder.classList.add('d-none');
+            if (img && placeholder) {
+                img.src = evt.target.result;
+                img.classList.remove('d-none');
+                placeholder.classList.add('d-none');
+            }
         };
         reader.readAsDataURL(file);
     }
 });
+
+updateLivePreview();
 </script>
 
 <?php require_once __DIR__ . '/../../includes/admin-footer.php'; ?>

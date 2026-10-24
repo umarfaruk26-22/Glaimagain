@@ -45,7 +45,7 @@ require_once __DIR__ . '/../../includes/admin-header.php';
             <div class="d-flex justify-content-between align-items-center">
                 <div>
                     <span class="text-muted small text-uppercase letter-spacing-1">Slider Speed</span>
-                    <h3 class="fw-bold text-forest mb-0 mt-1">5.0s</h3>
+                    <h3 class="fw-bold text-forest mb-0 mt-1">3.0s (Auto)</h3>
                 </div>
                 <div class="stat-icon-circle bg-mint text-forest">
                     <i class="fas fa-stopwatch"></i>
@@ -59,7 +59,7 @@ require_once __DIR__ . '/../../includes/admin-header.php';
             <div class="d-flex justify-content-between align-items-center">
                 <div>
                     <span class="text-muted small text-uppercase letter-spacing-1">Mobile Optimized</span>
-                    <h3 class="fw-bold text-forest mb-0 mt-1">Touch Ready</h3>
+                    <h3 class="fw-bold text-forest mb-0 mt-1">Touch Swipe</h3>
                 </div>
                 <div class="stat-icon-circle bg-mint text-forest">
                     <i class="fas fa-mobile-alt"></i>
@@ -91,12 +91,15 @@ require_once __DIR__ . '/../../includes/admin-header.php';
         <h5 class="fw-bold text-emerald mb-1">Interactive Homepage Carousel Slides</h5>
         <p class="text-muted small mb-0">Manage rotating luxury hero banners, headlines, call-to-actions, and mobile-specific images.</p>
     </div>
-    <div class="d-flex gap-2">
+    <div class="d-flex flex-wrap gap-2">
         <a href="<?= BASE_URL ?>admin/homepage" class="btn btn-outline-secondary">
             <i class="fas fa-arrow-left me-1"></i> Homepage CMS
         </a>
+        <a href="<?= BASE_URL ?>admin/carousel/batch-add.php" class="btn btn-outline-success">
+            <i class="fas fa-layer-group me-1"></i> Multi-Photo Batch Add
+        </a>
         <a href="<?= BASE_URL ?>admin/carousel/add.php" class="btn btn-primary">
-            <i class="fas fa-plus me-1"></i> Add New Slide
+            <i class="fas fa-plus me-1"></i> Add Single Slide
         </a>
     </div>
 </div>
@@ -107,7 +110,7 @@ require_once __DIR__ . '/../../includes/admin-header.php';
         <span class="fw-bold text-forest small text-uppercase letter-spacing-1">
             <i class="fas fa-layer-group text-gold me-2"></i>Carousel Slides Sequence (<?= count($slides) ?>)
         </span>
-        <span class="text-muted small">Slides auto-rotate every 5 seconds on the live homepage</span>
+        <span class="text-muted small"><i class="fas fa-sync-alt me-1 text-gold"></i> Slides auto-rotate horizontally every 3 seconds on live homepage</span>
     </div>
 
     <?php if (empty($slides)): ?>
@@ -236,7 +239,7 @@ require_once __DIR__ . '/../../includes/admin-header.php';
         </div>
         <div class="col-md-4">
             <strong class="text-dark d-block mb-1"><i class="fas fa-sliders-h text-emerald me-1"></i> Reordering &amp; Speed</strong>
-            Use the <strong>Sort Order</strong> field (1, 2, 3...) to control which banner appears first. Slides automatically transition smoothly every 5 seconds.
+            Use the <strong>Sort Order</strong> field (1, 2, 3...) to control sequence. Slides automatically scroll horizontally every <strong>3 seconds</strong>, and mobile users can fluidly swipe with fingers.
         </div>
     </div>
 </div>

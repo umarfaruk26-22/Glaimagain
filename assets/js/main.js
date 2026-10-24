@@ -158,21 +158,26 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // 6. Luxury Hero Carousel (Swiper 11 with Mobile Touch & Swipe Support)
+    // 6. Luxury Hero Carousel (Swiper 11 with 3-Second Horizontal Auto-Scroll & Mobile Touch Swipe)
     const heroSwiperEl = document.querySelector('.heroSwiper');
     if (heroSwiperEl && typeof Swiper !== 'undefined') {
         const slideCount = heroSwiperEl.querySelectorAll('.swiper-slide').length;
         const heroSwiper = new Swiper('.heroSwiper', {
+            direction: 'horizontal',
             loop: slideCount > 1,
-            speed: 850,
+            speed: 750,
             autoplay: slideCount > 1 ? {
-                delay: 5000,
+                delay: 3000,
                 disableOnInteraction: false,
                 pauseOnMouseEnter: true,
             } : false,
             grabCursor: true,
-            touchRatio: 1,
+            simulateTouch: true,
+            touchRatio: 1.2,
+            touchAngle: 45,
+            threshold: 5,
             resistanceRatio: 0.85,
+            roundLengths: true,
             navigation: {
                 nextEl: '.hero-swiper-next',
                 prevEl: '.hero-swiper-prev',
